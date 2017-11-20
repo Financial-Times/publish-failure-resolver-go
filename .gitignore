@@ -1,0 +1,6 @@
+*.iml
+.idea
+/publish-failure-resolver-go*
+vendor/*/
+.project
+.vscode
