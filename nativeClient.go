@@ -14,14 +14,16 @@ type nativeStoreClientInterface interface {
 }
 
 type nativeStoreClient struct {
-	httpClient 	      *http.Client
+	httpClient 	  *http.Client
 	nativeAddress string
+	authHeader    string
 }
 
-func NewNativeStoreClient(httpClient *http.Client, nativeAddress string) *nativeStoreClient {
+func NewNativeStoreClient(httpClient *http.Client, nativeAddress, authHeader string) *nativeStoreClient {
 	return &nativeStoreClient{
 		httpClient:    httpClient,
 		nativeAddress: nativeAddress,
+		authHeader:    authHeader,
 	}
 }
 
@@ -35,13 +37,14 @@ func (c *nativeStoreClient) GetNative(collection, uuid, tid string) ([]byte, err
 		return nil, fmt.Errorf("couldn't create request to fetch native content uuid=%v %v", uuid, err)
 	}
 	req.Header.Add(transactionidutils.TransactionIDHeader, tid)
+	req.Header.Add("Authorization", c.authHeader)
 	resp, err := c.httpClient.Do(req)
 	if err != nil {
 		return nil, fmt.Errorf("unsucessful request for fetching native content uuid=%v %v", uuid, err)
 	}
 	niceClose(resp)
 	if resp.StatusCode != 200 {
-		return nil, fmt.Errorf("native content not found uuid=%v status=%v %v", uuid, resp.StatusCode, err)
+		return nil, fmt.Errorf("not ok status while fetching native content uuid=%v status=%v", uuid, resp.StatusCode)
 	}
 	bodyAsBytes, err := ioutil.ReadAll(resp.Body)
 	if err != nil {

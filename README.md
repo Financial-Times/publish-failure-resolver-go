@@ -19,7 +19,7 @@ go build .
 ## Running locally
 
 ```
-./publish-failure-resolver-go --sourcePropertiesFileLocation="" --targetPropertiesFileLocation="" --contentUuidList="d33af908-c8d9-11e7-357e-ed056da2bd77 8cef4c94-c8cd-11e7-357e-ed056da2bd77" --transactionIdPrefix="t123" --sourceCredentialsFileLocation="" --targetCredentialsFileLocation=""
+./publish-failure-resolver-go --sourceEnv="pub-xp" --targetEnv="xp" --contentUuidList="d33af908-c8d9-11e7-357e-ed056da2bd77 8cef4c94-c8cd-11e7-357e-ed056da2bd77" --transactionIdPrefix="tid_test" --republishScope="both" --sourceAuth "Basic abcdefg=="
 ```
 
 1. Run the tests and install the binary:

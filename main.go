@@ -5,9 +5,6 @@ import (
 	"github.com/jawher/mow.cli"
 	log "github.com/Sirupsen/logrus"
 	"regexp"
-	"net/url"
-	"fmt"
-	"github.com/Financial-Times/transactionid-utils-go"
 	"net"
 	"time"
 	"net/http"
@@ -27,15 +24,15 @@ var collectionToOriginSystemId = map[string]string {
 func main() {
 	app := cli.App("publish-failure-resolver-go", "Republish, reimport or move content in UPP.")
 
-	sourcePropertiesFileLocation := app.String(cli.StringOpt{
-		Name:   "sourcePropertiesFileLocation",
+	sourceEnv := app.String(cli.StringOpt{
+		Name:   "sourceEnv",
 		Value:  "",
-		Desc:   "Source properties file",
+		Desc:   "Source environment (e.g. pub-xp)",
 	})
-	targetPropertiesFileLocation := app.String(cli.StringOpt{
-		Name:   "targetPropertiesFileLocation",
+	targetEnv := app.String(cli.StringOpt{
+		Name:   "targetEnv",
 		Value:  "",
-		Desc:   "Target properties file",
+		Desc:   "Target environment (e.g. xp)",
 	})
 	contentUuidsList := app.String(cli.StringOpt{
 		Name:   "contentUuidList",
@@ -47,16 +44,16 @@ func main() {
 		Value:  "",
 		Desc:   "Transaction ID prefix",
 	})
-	sourceCredentialsFileLocation := app.String(cli.StringOpt{
-		Name:   "sourceCredentialsFileLocation",
+	sourceAuth := app.String(cli.StringOpt{
+		Name:   "sourceAuth",
 		Value:  "",
-		Desc:   "Source credentials file location",
+		Desc:   "Source credentials formatted as Basic auth header. (e.g. Basic abcdefg=)",
 	})
-	targetCredentialsFileLocation := app.String(cli.StringOpt{
-		Name:   "targetCredentialsFileLocation",
-		Value:  "",
-		Desc:   "Target credentials file location",
-	})
+	//targetAuth := app.String(cli.StringOpt{
+	//	Name:   "targetAuth",
+	//	Value:  "",
+	//	Desc:   "targetCredentials formatted as Basic auth header. (e.g. Basic abcdefg=)",
+	//})
 	republishScope := app.String(cli.StringOpt{
 		Name:   "republishScope",
 		Value:  "",
@@ -67,28 +64,31 @@ func main() {
 	log.Infof("[Startup] publish-failure-resolver-go is starting ")
 
 	app.Action = func() {
-		log.Infof("%v", *sourcePropertiesFileLocation)
-		log.Infof("%v", *targetPropertiesFileLocation)
+		log.Infof("%v", *sourceEnv)
+		log.Infof("%v", *targetEnv)
 		log.Infof("%v", *contentUuidsList)
 		log.Infof("%v", *transactionIdPrefix)
-		log.Infof("%v", *sourceCredentialsFileLocation)
-		log.Infof("%v", *targetCredentialsFileLocation)
+		log.Infof("%v", *republishScope)
 
 		httpClient := setupHttpClient()
-		NewNativeStoreClient(httpClient, "https://pub-xp-up.ft.com/__nativerw/")
+		nativeStoreClient := NewNativeStoreClient(httpClient, "https://pub-xp-up.ft.com/__nativerw/", *sourceAuth)
+
 
 		uuids := RegSplit(*contentUuidsList, "\\s")
 		for _, uuid := range uuids {
 			log.Infof("uuid=%v", uuid)
-			for cms, _ := range collectionToOriginSystemId {
-				//collectionToOriginSystemId[cms]
+			for collection, _ := range collectionToOriginSystemId {
+				//collection collectionToOriginSystemId[cms]
 
 				if *republishScope == scopeBoth ||
-					(cms == collectionV1Metadata && *republishScope == scopeMetadata) ||
-					(cms != collectionV1Metadata && *republishScope == scopeContent) {
-
+					(collection == collectionV1Metadata && *republishScope == scopeMetadata) ||
+					(collection != collectionV1Metadata && *republishScope == scopeContent) {
+					nativeContent, err := nativeStoreClient.GetNative(collection, uuid, "tid_test")
+					if err != nil {
+						log.Warnf("can't publish uuid=%v %v", err)
+					}
+					log.Infof("%v", string(nativeContent))
 				}
-				getContentResult=`curl -qSfs -u ${sourceCredentials} -H "X-Request-Id : ${transactionHeader}" https://${sourceCluster}/__${sourceService}/${cms}/${uuid} 2>/dev/null`
 			}
 		}
 	}
