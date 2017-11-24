@@ -79,7 +79,7 @@ func main() {
 		uuids := RegSplit(*contentUuidsList, "\\s")
 		for _, uuid := range uuids {
 			log.Infof("uuid=%v", uuid)
-			foundCollection := ""
+			isFoundInAnyCollection := false
 			var nativeContent []byte
 			for collection, _ := range collectionToOriginSystemId {
 				if *republishScope == scopeBoth ||
@@ -92,19 +92,20 @@ func main() {
 						log.Warnf("error while fetching native content: %v", err)
 						continue
 					}
-					if isFound {
-						foundCollection = collection
-						break
+					if !isFound {
+						continue
+
 					}
+					isFoundInAnyCollection = true
+					originSystemId := collectionToOriginSystemId[collection]
+					log.Infof("found uuid=%v in collection=%v originSystemId=%v", uuid, collection, originSystemId)
+					log.Infof("%v", string(nativeContent))
 				}
 			}
-			if foundCollection == "" {
+			if !isFoundInAnyCollection {
 				log.Errorf("can't publish uuid=%v wasn't found in any of the native-store's collections", uuid)
 				continue
 			}
-			originSystemId := collectionToOriginSystemId[foundCollection]
-			log.Infof("found uuid=%v in collection=%v originSystemId=%v", uuid, foundCollection, originSystemId)
-			log.Infof("%v", string(nativeContent))
 		}
 	}
 	err := app.Run(os.Args)
