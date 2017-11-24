@@ -8,6 +8,8 @@ import (
 	"net"
 	"time"
 	"net/http"
+	//uuidutils "github.com/Financial-Times/uuid-utils-go"
+	"github.com/Financial-Times/transactionid-utils-go"
 )
 
 const (
@@ -15,27 +17,45 @@ const (
 	scopeContent = "content"
 	scopeMetadata = "metadata"
 	collectionV1Metadata = "v1-metadata"
+	cmsNotifier = "cms-notifier"
 )
 
-var collectionToOriginSystemId = map[string]string {
-	"methode": "methode-web-pub",
-	"wordpress": "wordpress",
-	"video": "next-video-editor",
-	"v1-metadata": "methode-web-pub",
+type targetSystem struct {
+	originSystemId string
+	notifierApp    string
+}
+
+var collectionToSystem = map[string]targetSystem {
+	"methode": {
+		originSystemId: "methode-web-pub",
+		notifierApp:    cmsNotifier,
+	},
+	"wordpress": {
+		originSystemId: "wordpress",
+		notifierApp:    cmsNotifier,
+	},
+	"video": {
+		originSystemId: "next-video-editor",
+		notifierApp:    cmsNotifier,
+	},
+	"v1-metadata": {
+		originSystemId: "methode-web-pub",
+		notifierApp:    "cms-metadata-notifier",
+	},
 }
 
 func main() {
 	app := cli.App("publish-failure-resolver-go", "Republish, reimport or move content in UPP.")
 
-	sourceEnv := app.String(cli.StringOpt{
-		Name:   "sourceEnv",
+	sourceEnvHost := app.String(cli.StringOpt{
+		Name:   "sourceEnvHost",
 		Value:  "",
-		Desc:   "Source environment (e.g. pub-xp)",
+		Desc:   "Source environment's full hostname (e.g. pub-xp-up.ft.com or upp-k8s-publishing-test-eu.ft.com)",
 	})
-	targetEnv := app.String(cli.StringOpt{
-		Name:   "targetEnv",
+	targetEnvHost := app.String(cli.StringOpt{
+		Name:   "targetEnvHost",
 		Value:  "",
-		Desc:   "Target environment (e.g. xp)",
+		Desc:   "Target environment's full hostname (e.g. xp-up.ft.com or upp-k8s-delivery-test-eu.ft.com)",
 	})
 	contentUuidsList := app.String(cli.StringOpt{
 		Name:   "contentUuidList",
@@ -52,11 +72,11 @@ func main() {
 		Value:  "",
 		Desc:   "Source credentials formatted as Basic auth header. (e.g. Basic abcdefg=)",
 	})
-	//targetAuth := app.String(cli.StringOpt{
-	//	Name:   "targetAuth",
-	//	Value:  "",
-	//	Desc:   "targetCredentials formatted as Basic auth header. (e.g. Basic abcdefg=)",
-	//})
+	targetAuth := app.String(cli.StringOpt{
+		Name:   "targetAuth",
+		Value:  "",
+		Desc:   "targetCredentials formatted as Basic auth header. (e.g. Basic abcdefg=)",
+	})
 	republishScope := app.String(cli.StringOpt{
 		Name:   "republishScope",
 		Value:  "",
@@ -67,21 +87,25 @@ func main() {
 	log.Infof("[Startup] publish-failure-resolver-go is starting ")
 
 	app.Action = func() {
-		log.Infof("sourceEnv=%v", *sourceEnv)
-		log.Infof("targetEnv=%v", *targetEnv)
+		log.Infof("sourceEnvHost=%v", *sourceEnvHost)
+		log.Infof("targetEnvHost=%v", *targetEnvHost)
 		log.Infof("contentUuidsList=%v", *contentUuidsList)
 		log.Infof("transactionIdPrefix=%v", *transactionIdPrefix)
 		log.Infof("republishScope=%v", *republishScope)
 
 		httpClient := setupHttpClient()
-		nativeStoreClient := NewNativeStoreClient(httpClient, "https://pub-xp-up.ft.com/__nativerw/", *sourceAuth)
+		nativeStoreClient := NewNativeStoreClient(httpClient, "https://" + *sourceEnvHost + "/__nativerw/", *sourceAuth)
+		notifierClient, err := NewNotifierClient(httpClient, "https://" + *targetEnvHost + "/__", *targetAuth)
+		if err!= nil {
+			log.Fatalf("Couldn't create notifier client. %v", err)
+		}
 
 		uuids := RegSplit(*contentUuidsList, "\\s")
 		for _, uuid := range uuids {
 			log.Infof("uuid=%v", uuid)
 			isFoundInAnyCollection := false
 			var nativeContent []byte
-			for collection, _ := range collectionToOriginSystemId {
+			for collection, _ := range collectionToSystem {
 				if *republishScope == scopeBoth ||
 					(collection == collectionV1Metadata && *republishScope == scopeMetadata) ||
 					(collection != collectionV1Metadata && *republishScope == scopeContent) {
@@ -97,9 +121,14 @@ func main() {
 
 					}
 					isFoundInAnyCollection = true
-					originSystemId := collectionToOriginSystemId[collection]
-					log.Infof("found uuid=%v in collection=%v originSystemId=%v", uuid, collection, originSystemId)
-					log.Infof("%v", string(nativeContent))
+					system := collectionToSystem[collection]
+					log.Infof("found uuid=%v in collection=%v originSystemId=%v notifierApp=%v", uuid, collection, system.originSystemId, system.notifierApp)
+					tid := *transactionIdPrefix + transactionidutils.NewTransactionID()
+					log.Infof("publishing uuid=%v tid=%v size=%vB", uuid, tid, len(nativeContent))
+					err = notifierClient.Notify(nativeContent, system.notifierApp, system.originSystemId, uuid, tid)
+					if err != nil {
+						log.Errorf("can't publish uuid=%v couldn't successfully send to notifier: %v", uuid, err)
+					}
 				}
 			}
 			if !isFoundInAnyCollection {
