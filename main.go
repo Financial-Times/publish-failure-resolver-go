@@ -18,7 +18,10 @@ const (
 )
 
 var collectionToOriginSystemId = map[string]string {
-	"v1-metadata": "methode",
+	"methode": "methode-web-pub",
+	"wordpress": "wordpress",
+	"video": "next-video-editor",
+	"v1-metadata": "methode-web-pub",
 }
 
 func main() {
@@ -64,32 +67,44 @@ func main() {
 	log.Infof("[Startup] publish-failure-resolver-go is starting ")
 
 	app.Action = func() {
-		log.Infof("%v", *sourceEnv)
-		log.Infof("%v", *targetEnv)
-		log.Infof("%v", *contentUuidsList)
-		log.Infof("%v", *transactionIdPrefix)
-		log.Infof("%v", *republishScope)
+		log.Infof("sourceEnv=%v", *sourceEnv)
+		log.Infof("targetEnv=%v", *targetEnv)
+		log.Infof("contentUuidsList=%v", *contentUuidsList)
+		log.Infof("transactionIdPrefix=%v", *transactionIdPrefix)
+		log.Infof("republishScope=%v", *republishScope)
 
 		httpClient := setupHttpClient()
 		nativeStoreClient := NewNativeStoreClient(httpClient, "https://pub-xp-up.ft.com/__nativerw/", *sourceAuth)
 
-
 		uuids := RegSplit(*contentUuidsList, "\\s")
 		for _, uuid := range uuids {
 			log.Infof("uuid=%v", uuid)
+			foundCollection := ""
+			var nativeContent []byte
 			for collection, _ := range collectionToOriginSystemId {
-				//collection collectionToOriginSystemId[cms]
-
 				if *republishScope == scopeBoth ||
 					(collection == collectionV1Metadata && *republishScope == scopeMetadata) ||
 					(collection != collectionV1Metadata && *republishScope == scopeContent) {
-					nativeContent, err := nativeStoreClient.GetNative(collection, uuid, "tid_test")
+					var err error
+					var isFound bool
+					nativeContent, isFound, err = nativeStoreClient.GetNative(collection, uuid, "tid_test")
 					if err != nil {
-						log.Warnf("can't publish uuid=%v %v", err)
+						log.Warnf("error while fetching native content: %v", err)
+						continue
 					}
-					log.Infof("%v", string(nativeContent))
+					if isFound {
+						foundCollection = collection
+						break
+					}
 				}
 			}
+			if foundCollection == "" {
+				log.Errorf("can't publish uuid=%v wasn't found in any of the native-store's collections", uuid)
+				continue
+			}
+			originSystemId := collectionToOriginSystemId[foundCollection]
+			log.Infof("found uuid=%v in collection=%v originSystemId=%v", uuid, foundCollection, originSystemId)
+			log.Infof("%v", string(nativeContent))
 		}
 	}
 	err := app.Run(os.Args)

@@ -27,30 +27,33 @@ func NewNativeStoreClient(httpClient *http.Client, nativeAddress, authHeader str
 	}
 }
 
-func (c *nativeStoreClient) GetNative(collection, uuid, tid string) ([]byte, error) {
+func (c *nativeStoreClient) GetNative(collection, uuid, tid string) (nativeContent []byte, found bool, err error) {
 	nativeUrl, err := url.Parse(c.nativeAddress + collection + "/" + uuid)
 	if err != nil {
-		return nil, fmt.Errorf("invalid address nativeUrl=%v", nativeUrl)
+		return nil, false, fmt.Errorf("invalid address nativeUrl=%v", nativeUrl)
 	}
 	req, err := http.NewRequest(http.MethodGet, nativeUrl.String(), nil)
 	if err != nil {
-		return nil, fmt.Errorf("couldn't create request to fetch native content uuid=%v %v", uuid, err)
+		return nil, false, fmt.Errorf("couldn't create request to fetch native content uuid=%v %v", uuid, err)
 	}
 	req.Header.Add(transactionidutils.TransactionIDHeader, tid)
 	req.Header.Add("Authorization", c.authHeader)
 	resp, err := c.httpClient.Do(req)
 	if err != nil {
-		return nil, fmt.Errorf("unsucessful request for fetching native content uuid=%v %v", uuid, err)
+		return nil, false, fmt.Errorf("unsucessful request for fetching native content uuid=%v %v", uuid, err)
 	}
-	niceClose(resp)
-	if resp.StatusCode != 200 {
-		return nil, fmt.Errorf("not ok status while fetching native content uuid=%v status=%v", uuid, resp.StatusCode)
+	if resp.StatusCode == http.StatusNotFound {
+		return nil, false, nil
+	}
+	if resp.StatusCode != http.StatusOK {
+		return nil, false, fmt.Errorf("unexpected status while fetching native content uuid=%v collectoin=%v status=%v", uuid, collection, resp.StatusCode)
 	}
 	bodyAsBytes, err := ioutil.ReadAll(resp.Body)
+	niceClose(resp)
 	if err != nil {
-		return nil, fmt.Errorf("failed to read response body for uuid=%v %v", uuid, err)
+		return nil, true, fmt.Errorf("failed to read response body for uuid=%v %v", uuid, err)
 	}
-	return bodyAsBytes, nil
+	return bodyAsBytes, true, nil
 }
 
 /*
