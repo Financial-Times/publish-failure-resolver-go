@@ -21,6 +21,7 @@ const (
 )
 
 type targetSystem struct {
+	name           string
 	originSystemID string
 	notifierApp    string
 	scope          string
@@ -28,26 +29,31 @@ type targetSystem struct {
 
 var collections = map[string]targetSystem{
 	"methode": {
+		name:           "methode",
 		originSystemID: "methode-web-pub",
 		notifierApp:    cmsNotifier,
 		scope:          scopeContent,
 	},
 	"wordpress": {
+		name:           "wordpress",
 		originSystemID: "wordpress",
 		notifierApp:    cmsNotifier,
 		scope:          scopeContent,
 	},
 	"video": {
+		name:           "video",
 		originSystemID: "next-video-editor",
 		notifierApp:    cmsNotifier,
 		scope:          scopeContent,
 	},
 	"v1-metadata": {
+		name:           "v1-metadata",
 		originSystemID: "methode-web-pub",
 		notifierApp:    "cms-metadata-notifier",
 		scope:          scopeMetadata,
 	},
 	"next-video-editor": {
+		name:           "next-video-editor",
 		originSystemID: "video-metadata",
 		notifierApp:    "cms-metadata-notifier",
 		scope:          scopeMetadata,
