@@ -1,45 +1,46 @@
 package main
 
 import (
-	"os"
-	"github.com/jawher/mow.cli"
-	log "github.com/Sirupsen/logrus"
-	"regexp"
 	"net"
-	"time"
 	"net/http"
+	"os"
+	"regexp"
+	"time"
+
+	log "github.com/Sirupsen/logrus"
+	"github.com/jawher/mow.cli"
 	//uuidutils "github.com/Financial-Times/uuid-utils-go"
 	"github.com/Financial-Times/transactionid-utils-go"
 )
 
 const (
-	scopeBoth = "both"
-	scopeContent = "content"
-	scopeMetadata = "metadata"
+	scopeBoth            = "both"
+	scopeContent         = "content"
+	scopeMetadata        = "metadata"
 	collectionV1Metadata = "v1-metadata"
-	cmsNotifier = "cms-notifier"
+	cmsNotifier          = "cms-notifier"
 )
 
 type targetSystem struct {
-	originSystemId string
+	originSystemID string
 	notifierApp    string
 }
 
-var collectionToSystem = map[string]targetSystem {
+var collectionToSystem = map[string]targetSystem{
 	"methode": {
-		originSystemId: "methode-web-pub",
+		originSystemID: "methode-web-pub",
 		notifierApp:    cmsNotifier,
 	},
 	"wordpress": {
-		originSystemId: "wordpress",
+		originSystemID: "wordpress",
 		notifierApp:    cmsNotifier,
 	},
 	"video": {
-		originSystemId: "next-video-editor",
+		originSystemID: "next-video-editor",
 		notifierApp:    cmsNotifier,
 	},
 	"v1-metadata": {
-		originSystemId: "methode-web-pub",
+		originSystemID: "methode-web-pub",
 		notifierApp:    "cms-metadata-notifier",
 	},
 }
@@ -48,39 +49,39 @@ func main() {
 	app := cli.App("publish-failure-resolver-go", "Republish, reimport or move content in UPP.")
 
 	sourceEnvHost := app.String(cli.StringOpt{
-		Name:   "sourceEnvHost",
-		Value:  "",
-		Desc:   "Source environment's full hostname (e.g. pub-xp-up.ft.com or upp-k8s-publishing-test-eu.ft.com)",
+		Name:  "sourceEnvHost",
+		Value: "",
+		Desc:  "Source environment's full hostname (e.g. pub-xp-up.ft.com or upp-k8s-publishing-test-eu.ft.com)",
 	})
 	targetEnvHost := app.String(cli.StringOpt{
-		Name:   "targetEnvHost",
-		Value:  "",
-		Desc:   "Target environment's full hostname (e.g. xp-up.ft.com or upp-k8s-delivery-test-eu.ft.com)",
+		Name:  "targetEnvHost",
+		Value: "",
+		Desc:  "Target environment's full hostname (e.g. xp-up.ft.com or upp-k8s-delivery-test-eu.ft.com)",
 	})
 	contentUuidsList := app.String(cli.StringOpt{
-		Name:   "contentUuidList",
-		Value:  "",
-		Desc:   "Content uuid list",
+		Name:  "contentUuidList",
+		Value: "",
+		Desc:  "Content uuid list",
 	})
-	transactionIdPrefix := app.String(cli.StringOpt{
-		Name:   "transactionIdPrefix",
-		Value:  "",
-		Desc:   "Transaction ID prefix",
+	transactionIDPrefix := app.String(cli.StringOpt{
+		Name:  "transactionIdPrefix",
+		Value: "",
+		Desc:  "Transaction ID prefix",
 	})
 	sourceAuth := app.String(cli.StringOpt{
-		Name:   "sourceAuth",
-		Value:  "",
-		Desc:   "Source credentials formatted as Basic auth header. (e.g. Basic abcdefg=)",
+		Name:  "sourceAuth",
+		Value: "",
+		Desc:  "Source credentials formatted as Basic auth header. (e.g. Basic abcdefg=)",
 	})
 	targetAuth := app.String(cli.StringOpt{
-		Name:   "targetAuth",
-		Value:  "",
-		Desc:   "targetCredentials formatted as Basic auth header. (e.g. Basic abcdefg=)",
+		Name:  "targetAuth",
+		Value: "",
+		Desc:  "targetCredentials formatted as Basic auth header. (e.g. Basic abcdefg=)",
 	})
 	republishScope := app.String(cli.StringOpt{
-		Name:   "republishScope",
-		Value:  "",
-		Desc:   "Republish scope (content, metadata, both)",
+		Name:  "republishScope",
+		Value: "",
+		Desc:  "Republish scope (content, metadata, both)",
 	})
 
 	log.SetLevel(log.InfoLevel)
@@ -90,22 +91,22 @@ func main() {
 		log.Infof("sourceEnvHost=%v", *sourceEnvHost)
 		log.Infof("targetEnvHost=%v", *targetEnvHost)
 		log.Infof("contentUuidsList=%v", *contentUuidsList)
-		log.Infof("transactionIdPrefix=%v", *transactionIdPrefix)
+		log.Infof("transactionIdPrefix=%v", *transactionIDPrefix)
 		log.Infof("republishScope=%v", *republishScope)
 
-		httpClient := setupHttpClient()
-		nativeStoreClient := NewNativeStoreClient(httpClient, "https://" + *sourceEnvHost + "/__nativerw/", *sourceAuth)
-		notifierClient, err := NewNotifierClient(httpClient, "https://" + *targetEnvHost + "/__", *targetAuth)
-		if err!= nil {
+		httpClient := setupHTTPClient()
+		nativeStoreClient := NewNativeStoreClient(httpClient, "https://"+*sourceEnvHost+"/__nativerw/", *sourceAuth)
+		notifierClient, err := NewNotifierClient(httpClient, "https://"+*targetEnvHost+"/__", *targetAuth)
+		if err != nil {
 			log.Fatalf("Couldn't create notifier client. %v", err)
 		}
 
-		uuids := RegSplit(*contentUuidsList, "\\s")
+		uuids := regSplit(*contentUuidsList, "\\s")
 		for _, uuid := range uuids {
 			log.Infof("uuid=%v", uuid)
 			isFoundInAnyCollection := false
 			var nativeContent []byte
-			for collection, _ := range collectionToSystem {
+			for collection := range collectionToSystem {
 				if *republishScope == scopeBoth ||
 					(collection == collectionV1Metadata && *republishScope == scopeMetadata) ||
 					(collection != collectionV1Metadata && *republishScope == scopeContent) {
@@ -122,10 +123,10 @@ func main() {
 					}
 					isFoundInAnyCollection = true
 					system := collectionToSystem[collection]
-					log.Infof("found uuid=%v in collection=%v originSystemId=%v notifierApp=%v", uuid, collection, system.originSystemId, system.notifierApp)
-					tid := *transactionIdPrefix + transactionidutils.NewTransactionID()
+					log.Infof("found uuid=%v in collection=%v originSystemId=%v notifierApp=%v", uuid, collection, system.originSystemID, system.notifierApp)
+					tid := *transactionIDPrefix + transactionidutils.NewTransactionID()
 					log.Infof("publishing uuid=%v tid=%v size=%vB", uuid, tid, len(nativeContent))
-					err = notifierClient.Notify(nativeContent, system.notifierApp, system.originSystemId, uuid, tid)
+					err = notifierClient.Notify(nativeContent, system.notifierApp, system.originSystemID, uuid, tid)
 					if err != nil {
 						log.Errorf("can't publish uuid=%v couldn't successfully send to notifier: %v", uuid, err)
 					}
@@ -144,11 +145,11 @@ func main() {
 	}
 }
 
-func RegSplit(text string, delimeter string) []string {
+func regSplit(text string, delimeter string) []string {
 	reg := regexp.MustCompile(delimeter)
 	indexes := reg.FindAllStringIndex(text, -1)
 	laststart := 0
-	result := make([]string, len(indexes) + 1)
+	result := make([]string, len(indexes)+1)
 	for i, element := range indexes {
 		result[i] = text[laststart:element[0]]
 		laststart = element[1]
@@ -157,7 +158,7 @@ func RegSplit(text string, delimeter string) []string {
 	return result
 }
 
-func setupHttpClient() *http.Client {
+func setupHTTPClient() *http.Client {
 	return &http.Client{
 		Transport: &http.Transport{
 			Proxy: http.ProxyFromEnvironment,
