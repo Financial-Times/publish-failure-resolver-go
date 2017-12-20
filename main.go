@@ -92,18 +92,17 @@ func main() {
 		log.Infof("targetEnvHost=%v", *targetEnvHost)
 		log.Infof("contentUuidsList=%v", *contentUuidsList)
 		log.Infof("transactionIdPrefix=%v", *transactionIDPrefix)
-		log.Infof("republishScope=%v", *republishScope)
+		log.Infof("republishScope=%v\n", *republishScope)
 
 		httpClient := setupHTTPClient()
-		nativeStoreClient := NewNativeStoreClient(httpClient, "https://"+*sourceEnvHost+"/__nativerw/", *sourceAuth)
-		notifierClient, err := NewNotifierClient(httpClient, "https://"+*targetEnvHost+"/__", *targetAuth)
+		nativeStoreClient := newNativeStoreClient(httpClient, "https://"+*sourceEnvHost+"/__nativerw/", *sourceAuth)
+		notifierClient, err := newNotifierClient(httpClient, "https://"+*targetEnvHost+"/__", *targetAuth)
 		if err != nil {
 			log.Fatalf("Couldn't create notifier client. %v", err)
 		}
 
 		uuids := regSplit(*contentUuidsList, "\\s")
 		for _, uuid := range uuids {
-			log.Infof("uuid=%v", uuid)
 			isFoundInAnyCollection := false
 			var nativeContent []byte
 			for collection := range collectionToSystem {
@@ -123,9 +122,8 @@ func main() {
 					}
 					isFoundInAnyCollection = true
 					system := collectionToSystem[collection]
-					log.Infof("found uuid=%v in collection=%v originSystemId=%v notifierApp=%v", uuid, collection, system.originSystemID, system.notifierApp)
 					tid := *transactionIDPrefix + transactionidutils.NewTransactionID()
-					log.Infof("publishing uuid=%v tid=%v size=%vB", uuid, tid, len(nativeContent))
+					log.Infof("publishing uuid=%v tid=%v collection=%v originSystemId=%v size=%vB notifierApp=%v", uuid, tid, collection, system.originSystemID, len(nativeContent), system.notifierApp)
 					err = notifierClient.Notify(nativeContent, system.notifierApp, system.originSystemID, uuid, tid)
 					if err != nil {
 						log.Errorf("can't publish uuid=%v couldn't successfully send to notifier: %v", uuid, err)

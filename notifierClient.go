@@ -1,14 +1,15 @@
 package main
 
 import (
-	"net/url"
 	"fmt"
-	"net/http"
 	"io/ioutil"
+	"net/http"
+	"net/url"
 
-	log "github.com/Sirupsen/logrus"
-	"github.com/Financial-Times/transactionid-utils-go"
 	"bytes"
+
+	"github.com/Financial-Times/transactionid-utils-go"
+	log "github.com/Sirupsen/logrus"
 )
 
 type notifierClientInterface interface {
@@ -21,15 +22,15 @@ type notifierClient struct {
 	authHeader          string
 }
 
-func NewNotifierClient(httpClient *http.Client, notifierAddress, authHeader string) (*notifierClient, error) {
-		return &notifierClient{
+func newNotifierClient(httpClient *http.Client, notifierAddress, authHeader string) (*notifierClient, error) {
+	return &notifierClient{
 		httpClient:          httpClient,
 		notifierAddressBase: notifierAddress,
 		authHeader:          authHeader,
 	}, nil
 }
 
-func (c *notifierClient) Notify(nativeContent []byte, notifierApp, originSystemId, uuid, tid string) error {
+func (c *notifierClient) Notify(nativeContent []byte, notifierApp, originSystemID, uuid, tid string) error {
 	notifierURL, err := url.Parse(c.notifierAddressBase + notifierApp + "/notify")
 	if err != nil {
 		return fmt.Errorf("coulnd't create URL for notifierAddressBase=%v notifierApp=%v", c.notifierAddressBase, notifierApp)
@@ -41,8 +42,8 @@ func (c *notifierClient) Notify(nativeContent []byte, notifierApp, originSystemI
 	req.Header.Add(transactionidutils.TransactionIDHeader, tid)
 	req.Header.Add("Authorization", c.authHeader)
 	req.Header.Add("Content-Type", "application/json")
-	req.Header.Add("X-Origin-System-Id", originSystemId)
-	log.Infof("Notify url=%v", notifierURL.String())
+	req.Header.Add("X-Origin-System-Id", originSystemID)
+	// log.Infof("Notify url=%v", notifierURL.String())
 	resp, err := c.httpClient.Do(req)
 	if err != nil {
 		return fmt.Errorf("unsucessful request for notifying for uuid=%v %v", uuid, err)

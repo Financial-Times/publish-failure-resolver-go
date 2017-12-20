@@ -1,12 +1,13 @@
 package main
 
 import (
-	"net/url"
 	"fmt"
-	"github.com/Financial-Times/transactionid-utils-go"
-	"net/http"
-	"github.com/Sirupsen/logrus"
 	"io/ioutil"
+	"net/http"
+	"net/url"
+
+	"github.com/Financial-Times/transactionid-utils-go"
+	"github.com/Sirupsen/logrus"
 )
 
 type nativeStoreClientInterface interface {
@@ -14,12 +15,12 @@ type nativeStoreClientInterface interface {
 }
 
 type nativeStoreClient struct {
-	httpClient 	  *http.Client
+	httpClient    *http.Client
 	nativeAddress string
 	authHeader    string
 }
 
-func NewNativeStoreClient(httpClient *http.Client, nativeAddress, authHeader string) *nativeStoreClient {
+func newNativeStoreClient(httpClient *http.Client, nativeAddress, authHeader string) *nativeStoreClient {
 	return &nativeStoreClient{
 		httpClient:    httpClient,
 		nativeAddress: nativeAddress,
@@ -28,11 +29,11 @@ func NewNativeStoreClient(httpClient *http.Client, nativeAddress, authHeader str
 }
 
 func (c *nativeStoreClient) GetNative(collection, uuid, tid string) (nativeContent []byte, found bool, err error) {
-	nativeUrl, err := url.Parse(c.nativeAddress + collection + "/" + uuid)
+	nativeURL, err := url.Parse(c.nativeAddress + collection + "/" + uuid)
 	if err != nil {
-		return nil, false, fmt.Errorf("invalid address nativeUrl=%v", nativeUrl)
+		return nil, false, fmt.Errorf("invalid address nativeUrl=%v", nativeURL)
 	}
-	req, err := http.NewRequest(http.MethodGet, nativeUrl.String(), nil)
+	req, err := http.NewRequest(http.MethodGet, nativeURL.String(), nil)
 	if err != nil {
 		return nil, false, fmt.Errorf("couldn't create request to fetch native content uuid=%v %v", uuid, err)
 	}
@@ -62,7 +63,7 @@ func (c *nativeStoreClient) GetNative(collection, uuid, tid string) (nativeConte
 	if err != nil {
 		return "", fmt.Errorf("failed to unmarshal response body for uuid=%v %v", uuid, err)
 	}
- */
+*/
 
 func niceClose(resp *http.Response) {
 	defer func() {
