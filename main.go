@@ -112,7 +112,7 @@ func main() {
 		}
 
 		uuids := regSplit(*contentUuidsList, "\\s")
-		republisher.republish(uuids, *republishScope, *transactionIDPrefix)
+		republisher.Republish(uuids, *republishScope, *transactionIDPrefix)
 	}
 	err := app.Run(os.Args)
 	if err != nil {
