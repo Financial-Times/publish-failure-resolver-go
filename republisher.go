@@ -59,3 +59,8 @@ func (r *notifyingRepublisher) RepublishOneFromCollection(uuid string, republish
 	}
 	return true
 }
+
+//to return errors instead of logging for testability
+//decide on what to expose at interface
+//have yourself a merry little christmas
+//if not found try document store, maybe it's an image set, then try again. how? recursively or how will it work?
