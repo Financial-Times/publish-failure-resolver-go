@@ -11,7 +11,7 @@ import (
 )
 
 type nativeStoreClientInterface interface {
-	GetNative(collection, uuid, tid string) (string, error)
+	GetNative(collection, uuid, tid string) (nativeContent []byte, found bool, err error)
 }
 
 type nativeStoreClient struct {

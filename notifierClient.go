@@ -12,25 +12,25 @@ import (
 	log "github.com/Sirupsen/logrus"
 )
 
-type notifierClientInterface interface {
-	Notify(nativeContent []byte, uuid, tid string) error
+type notifierClient interface {
+	Notify(nativeContent []byte, notifierApp, originSystemID, uuid, tid string) error
 }
 
-type notifierClient struct {
+type httpNotifier struct {
 	httpClient          *http.Client
 	notifierAddressBase string
 	authHeader          string
 }
 
-func newNotifierClient(httpClient *http.Client, notifierAddress, authHeader string) (*notifierClient, error) {
-	return &notifierClient{
+func newHTTPNotifier(httpClient *http.Client, notifierAddress, authHeader string) (*httpNotifier, error) {
+	return &httpNotifier{
 		httpClient:          httpClient,
 		notifierAddressBase: notifierAddress,
 		authHeader:          authHeader,
 	}, nil
 }
 
-func (c *notifierClient) Notify(nativeContent []byte, notifierApp, originSystemID, uuid, tid string) error {
+func (c *httpNotifier) Notify(nativeContent []byte, notifierApp, originSystemID, uuid, tid string) error {
 	notifierURL, err := url.Parse(c.notifierAddressBase + notifierApp + "/notify")
 	if err != nil {
 		return fmt.Errorf("coulnd't create URL for notifierAddressBase=%v notifierApp=%v", c.notifierAddressBase, notifierApp)

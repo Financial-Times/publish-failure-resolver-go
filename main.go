@@ -10,7 +10,6 @@ import (
 	log "github.com/Sirupsen/logrus"
 	"github.com/jawher/mow.cli"
 	//uuidutils "github.com/Financial-Times/uuid-utils-go"
-	"github.com/Financial-Times/transactionid-utils-go"
 )
 
 const (
@@ -106,44 +105,14 @@ func main() {
 
 		httpClient := setupHTTPClient()
 		nativeStoreClient := newNativeStoreClient(httpClient, "https://"+*sourceEnvHost+"/__nativerw/", *sourceAuth)
-		notifierClient, err := newNotifierClient(httpClient, "https://"+*targetEnvHost+"/__", *targetAuth)
+		notifierClient, err := newHTTPNotifier(httpClient, "https://"+*targetEnvHost+"/__", *targetAuth)
+		republisher := newNotifyingRepublisher(notifierClient, nativeStoreClient)
 		if err != nil {
 			log.Fatalf("Couldn't create notifier client. %v", err)
 		}
 
 		uuids := regSplit(*contentUuidsList, "\\s")
-		for _, uuid := range uuids {
-			isFoundInAnyCollection := false
-			var nativeContent []byte
-			for collectionName, collection := range collections {
-				if *republishScope != scopeBoth && collection.scope != *republishScope {
-					continue
-				}
-				var err error
-				var isFound bool
-				nativeContent, isFound, err = nativeStoreClient.GetNative(collectionName, uuid, "tid_test")
-				if err != nil {
-					log.Warnf("error while fetching native content: %v", err)
-					continue
-				}
-				if !isFound {
-					continue
-
-				}
-				isFoundInAnyCollection = true
-				system := collections[collectionName]
-				tid := *transactionIDPrefix + transactionidutils.NewTransactionID()
-				log.Infof("publishing uuid=%v tid=%v collection=%v originSystemId=%v size=%vB notifierApp=%v", uuid, tid, collection, system.originSystemID, len(nativeContent), system.notifierApp)
-				err = notifierClient.Notify(nativeContent, system.notifierApp, system.originSystemID, uuid, tid)
-				if err != nil {
-					log.Errorf("can't publish uuid=%v couldn't successfully send to notifier: %v", uuid, err)
-				}
-			}
-			if !isFoundInAnyCollection {
-				log.Errorf("can't publish uuid=%v wasn't found in any of the native-store's collections", uuid)
-				continue
-			}
-		}
+		republisher.republish(uuids, *republishScope, *transactionIDPrefix)
 	}
 	err := app.Run(os.Args)
 	if err != nil {
