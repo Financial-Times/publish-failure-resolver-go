@@ -6,9 +6,7 @@ import (
 )
 
 type republisher interface {
-	Republish(uuids []string, republishScope string, tidPrefix string)
-	RepublishOne(uuid string, republishScope string, tidPrefix string)
-	RepublishOneFromCollection(uuid string, republishScope string, tidPrefix string, system targetSystem) (wasFound bool)
+	RepublishUUID(uuid string, republishScope string, tidPrefix string)
 }
 
 type notifyingRepublisher struct {
@@ -20,16 +18,10 @@ func newNotifyingRepublisher(notifierClient notifierClient, nativeStoreClient na
 	return &notifyingRepublisher{notifierClient, nativeStoreClient}
 }
 
-func (r *notifyingRepublisher) Republish(uuids []string, republishScope string, tidPrefix string) {
-	for _, uuid := range uuids {
-		r.RepublishOne(uuid, republishScope, tidPrefix)
-	}
-}
-
-func (r *notifyingRepublisher) RepublishOne(uuid string, republishScope string, tidPrefix string) {
+func (r *notifyingRepublisher) RepublishUUID(uuid string, republishScope string, tidPrefix string) {
 	isFoundInAnyCollection := false
 	for _, system := range collections {
-		isFound := r.RepublishOneFromCollection(uuid, republishScope, tidPrefix, system)
+		isFound := r.republishUUIDFromCollection(uuid, republishScope, tidPrefix, system)
 		if isFound {
 			isFoundInAnyCollection = true
 		}
@@ -39,7 +31,7 @@ func (r *notifyingRepublisher) RepublishOne(uuid string, republishScope string, 
 	}
 }
 
-func (r *notifyingRepublisher) RepublishOneFromCollection(uuid string, republishScope string, tidPrefix string, system targetSystem) (wasFound bool) {
+func (r *notifyingRepublisher) republishUUIDFromCollection(uuid string, republishScope string, tidPrefix string, system targetSystem) (wasFound bool) {
 	if republishScope != scopeBoth && republishScope != system.scope {
 		return true
 	}
@@ -64,3 +56,4 @@ func (r *notifyingRepublisher) RepublishOneFromCollection(uuid string, republish
 //decide on what to expose at interface
 //have yourself a merry little christmas
 //if not found try document store, maybe it's an image set, then try again. how? recursively or how will it work?
+//parallelize, rate limit.

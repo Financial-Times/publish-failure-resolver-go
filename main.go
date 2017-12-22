@@ -98,6 +98,16 @@ func main() {
 		Value: "",
 		Desc:  "Republish scope (content, metadata, both)",
 	})
+	rateLimitMs := app.Int(cli.IntOpt{
+		Name:  "rateLimitMs",
+		Value: 200,
+		Desc:  "Rate limit at which one thread should not republish faster. (e.g. 200ms)",
+	})
+	parallelism := app.Int(cli.IntOpt{
+		Name:  "parallelism",
+		Value: 1,
+		Desc:  "Number of parallel threads to take uuids and republish independently. must >= 1 (e.g. 16)",
+	})
 
 	log.SetLevel(log.InfoLevel)
 	log.Infof("[Startup] publish-failure-resolver-go is starting ")
@@ -108,17 +118,20 @@ func main() {
 		log.Infof("contentUuidsList=%v", *contentUuidsList)
 		log.Infof("transactionIdPrefix=%v", *transactionIDPrefix)
 		log.Infof("republishScope=%v\n", *republishScope)
+		log.Infof("rateLimitMs=%v\n", rateLimitMs)
+		log.Infof("parallelism=%v\n", *parallelism)
 
 		httpClient := setupHTTPClient()
 		nativeStoreClient := newNativeStoreClient(httpClient, "https://"+*sourceEnvHost+"/__nativerw/", *sourceAuth)
 		notifierClient, err := newHTTPNotifier(httpClient, "https://"+*targetEnvHost+"/__", *targetAuth)
 		republisher := newNotifyingRepublisher(notifierClient, nativeStoreClient)
+		parallelRepublisher := newNotifyingParallelRepublisher(republisher, *parallelism, time.Duration(*rateLimitMs)*time.Millisecond)
 		if err != nil {
 			log.Fatalf("Couldn't create notifier client. %v", err)
 		}
 
 		uuids := regSplit(*contentUuidsList, "\\s")
-		republisher.Republish(uuids, *republishScope, *transactionIDPrefix)
+		parallelRepublisher.Republish(uuids, *republishScope, *transactionIDPrefix)
 	}
 	err := app.Run(os.Args)
 	if err != nil {
