@@ -1,6 +1,7 @@
 package main
 
 import (
+	"sync"
 	"time"
 )
 
@@ -11,6 +12,7 @@ type parallelRepublisher interface {
 type notifyingParallelRepublisher struct {
 	republisher republisher
 	queues      []*queueWithLimiter
+	wg          *sync.WaitGroup
 }
 
 type queueWithLimiter struct {
@@ -25,7 +27,9 @@ func newNotifyingParallelRepublisher(republisher republisher, parallelism int, r
 		q := make(chan string, 1)
 		queues = append(queues, &queueWithLimiter{l, q})
 	}
-	return &notifyingParallelRepublisher{republisher, queues}
+	var wg sync.WaitGroup
+	wg.Add(parallelism)
+	return &notifyingParallelRepublisher{republisher, queues, &wg}
 }
 
 func (r *notifyingParallelRepublisher) Republish(uuids []string, republishScope string, tidPrefix string) {
@@ -41,6 +45,7 @@ func (r *notifyingParallelRepublisher) Republish(uuids []string, republishScope 
 	for _, ql := range r.queues {
 		close(ql.q)
 	}
+	r.wg.Wait()
 }
 
 func (r *notifyingParallelRepublisher) republishFromQueue(ql *queueWithLimiter, republishScope string, tidPrefix string) {
@@ -48,4 +53,5 @@ func (r *notifyingParallelRepublisher) republishFromQueue(ql *queueWithLimiter, 
 		<-ql.l
 		r.republisher.RepublishUUID(uuid, republishScope, tidPrefix)
 	}
+	r.wg.Done()
 }

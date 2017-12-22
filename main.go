@@ -52,12 +52,12 @@ var collections = map[string]targetSystem{
 		notifierApp:    "cms-metadata-notifier",
 		scope:          scopeMetadata,
 	},
-	"next-video-editor": {
-		name:           "next-video-editor",
-		originSystemID: "video-metadata",
-		notifierApp:    "cms-metadata-notifier",
-		scope:          scopeMetadata,
-	},
+	// "next-video-editor": {
+	// 	name:           "next-video-editor",
+	// 	originSystemID: "video-metadata",
+	// 	notifierApp:    "cms-metadata-notifier",
+	// 	scope:          scopeMetadata,
+	// },
 }
 
 func main() {
@@ -73,6 +73,11 @@ func main() {
 		Value: "",
 		Desc:  "Target environment's full hostname (e.g. xp-up.ft.com or upp-k8s-delivery-test-eu.ft.com)",
 	})
+	deliveryEnvHost := app.String(cli.StringOpt{
+		Name:  "deliveryEnvHost",
+		Value: "",
+		Desc:  "Delivery environment's full hostname, used for accessing document-store-api (e.g. xp-up.ft.com or upp-k8s-delivery-test-eu.ft.com)",
+	})
 	contentUuidsList := app.String(cli.StringOpt{
 		Name:  "contentUuidList",
 		Value: "",
@@ -86,12 +91,17 @@ func main() {
 	sourceAuth := app.String(cli.StringOpt{
 		Name:  "sourceAuth",
 		Value: "",
-		Desc:  "Source credentials formatted as Basic auth header. (e.g. Basic abcdefg=)",
+		Desc:  "Source env credentials formatted as Basic auth header. (e.g. Basic abcdefg=)",
 	})
 	targetAuth := app.String(cli.StringOpt{
 		Name:  "targetAuth",
 		Value: "",
-		Desc:  "targetCredentials formatted as Basic auth header. (e.g. Basic abcdefg=)",
+		Desc:  "Target env credentials formatted as Basic auth header. (e.g. Basic abcdefg=)",
+	})
+	deliveryAuth := app.String(cli.StringOpt{
+		Name:  "deliveryAuth",
+		Value: "",
+		Desc:  "Delivery env credentials formatted as Basic auth header. (e.g. Basic abcdefg=)",
 	})
 	republishScope := app.String(cli.StringOpt{
 		Name:  "republishScope",
@@ -115,11 +125,13 @@ func main() {
 	app.Action = func() {
 		log.Infof("sourceEnvHost=%v", *sourceEnvHost)
 		log.Infof("targetEnvHost=%v", *targetEnvHost)
+		log.Infof("deliveryEnvHost=%v", *deliveryEnvHost)
 		log.Infof("contentUuidsList=%v", *contentUuidsList)
 		log.Infof("transactionIdPrefix=%v", *transactionIDPrefix)
-		log.Infof("republishScope=%v\n", *republishScope)
-		log.Infof("rateLimitMs=%v\n", rateLimitMs)
-		log.Infof("parallelism=%v\n", *parallelism)
+		log.Infof("republishScope=%v", *republishScope)
+		log.Infof("rateLimitMs=%v", *rateLimitMs)
+		log.Infof("parallelism=%v", *parallelism)
+		log.Infof("%v", (*deliveryAuth)[:1])
 
 		httpClient := setupHTTPClient()
 		nativeStoreClient := newNativeStoreClient(httpClient, "https://"+*sourceEnvHost+"/__nativerw/", *sourceAuth)

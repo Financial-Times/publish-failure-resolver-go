@@ -38,7 +38,7 @@ func (r *notifyingRepublisher) republishUUIDFromCollection(uuid string, republis
 	nativeContent, isFound, err := r.nativeStoreClient.GetNative(system.name, uuid, "tid_test")
 	if err != nil {
 		log.Warnf("error while fetching native content: %v", err)
-		return true
+		return false
 	}
 	if !isFound {
 		return false
@@ -47,13 +47,14 @@ func (r *notifyingRepublisher) republishUUIDFromCollection(uuid string, republis
 	log.Infof("publishing uuid=%v tid=%v collection=%v originSystemId=%v size=%vB notifierApp=%v", uuid, tid, system.name, system.originSystemID, len(nativeContent), system.notifierApp)
 	err = r.notifierClient.Notify(nativeContent, system.notifierApp, system.originSystemID, uuid, tid)
 	if err != nil {
-		log.Errorf("can't publish uuid=%v couldn't successfully send to notifier: %v", uuid, err)
+		log.Errorf("can't publish uuid=%v tid=%v couldn't successfully send to notifier: %v", uuid, tid, err)
 	}
 	return true
 }
 
 //to return errors instead of logging for testability
-//decide on what to expose at interface
+//decide on what to expose at interface. done.
 //have yourself a merry little christmas
 //if not found try document store, maybe it's an image set, then try again. how? recursively or how will it work?
-//parallelize, rate limit.
+//parallelize, rate limit. done.
+//scope is part of RepublishUUID not republishUUIDFromCollection? decide.

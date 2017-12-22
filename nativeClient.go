@@ -47,7 +47,7 @@ func (c *nativeStoreClient) GetNative(collection, uuid, tid string) (nativeConte
 		return nil, false, nil
 	}
 	if resp.StatusCode != http.StatusOK {
-		return nil, false, fmt.Errorf("unexpected status while fetching native content uuid=%v collectoin=%v status=%v", uuid, collection, resp.StatusCode)
+		return nil, false, fmt.Errorf("unexpected status while fetching native content uuid=%v collection=%v status=%v", uuid, collection, resp.StatusCode)
 	}
 	bodyAsBytes, err := ioutil.ReadAll(resp.Body)
 	niceClose(resp)
