@@ -50,26 +50,16 @@ func (c *nativeStoreClient) GetNative(collection, uuid, tid string) (nativeConte
 		return nil, false, fmt.Errorf("unexpected status while fetching native content uuid=%v collection=%v status=%v", uuid, collection, resp.StatusCode)
 	}
 	bodyAsBytes, err := ioutil.ReadAll(resp.Body)
-	niceClose(resp)
+	defer niceClose(resp)
 	if err != nil {
 		return nil, true, fmt.Errorf("failed to read response body for uuid=%v %v", uuid, err)
 	}
 	return bodyAsBytes, true, nil
 }
 
-/*
-	var content Content
-	err = json.Unmarshal(bodyAsBytes, &content)
-	if err != nil {
-		return "", fmt.Errorf("failed to unmarshal response body for uuid=%v %v", uuid, err)
-	}
-*/
-
 func niceClose(resp *http.Response) {
-	defer func() {
-		err := resp.Body.Close()
-		if err != nil {
-			logrus.Warnf("Couldn't close response body %v", err)
-		}
-	}()
+	err := resp.Body.Close()
+	if err != nil {
+		logrus.Warnf("Couldn't close response body %v", err)
+	}
 }

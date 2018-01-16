@@ -11,30 +11,46 @@ type republisher interface {
 
 type notifyingRepublisher struct {
 	notifierClient    notifierClient
+	docStoreClient    docStoreClient
 	nativeStoreClient nativeStoreClientInterface
 }
 
-func newNotifyingRepublisher(notifierClient notifierClient, nativeStoreClient nativeStoreClientInterface) *notifyingRepublisher {
-	return &notifyingRepublisher{notifierClient, nativeStoreClient}
+func newNotifyingRepublisher(notifierClient notifierClient, docStoreClient docStoreClient, nativeStoreClient nativeStoreClientInterface) *notifyingRepublisher {
+	return &notifyingRepublisher{notifierClient, docStoreClient, nativeStoreClient}
 }
 
 func (r *notifyingRepublisher) RepublishUUID(uuid string, republishScope string, tidPrefix string) {
 	isFoundInAnyCollection := false
+	isScopedInAnyCollection := false
 	for _, system := range collections {
-		isFound := r.republishUUIDFromCollection(uuid, republishScope, tidPrefix, system)
+		if republishScope != scopeBoth && republishScope != system.scope {
+			continue
+		}
+		isScopedInAnyCollection = true
+		isFound := r.republishUUIDFromCollection(uuid, tidPrefix, system)
 		if isFound {
 			isFoundInAnyCollection = true
 		}
 	}
-	if !isFoundInAnyCollection {
-		log.Errorf("can't publish uuid=%v wasn't found in any of the native-store's collections", uuid)
+
+	if !isFoundInAnyCollection && isScopedInAnyCollection {
+		serachingTid := tidPrefix + transactionidutils.NewTransactionID()
+		isFoundAsImageSet, imageModelUUID, err := r.docStoreClient.GetImageSetsModelUUID(uuid, serachingTid)
+		if err != nil {
+			log.Errorf("couldn't get ImageModel uuid from suspected ImageSet uuid=%v searchingTid=%v %v", uuid, serachingTid, err)
+		}
+		if !isFoundAsImageSet {
+			log.Errorf("can't publish uuid=%v wasn't found in any of the native-store's collections and it's not an ImageSet", uuid)
+			return
+		}
+		isFound := r.republishUUIDFromCollection(imageModelUUID, tidPrefix, collections["methode"])
+		if !isFound {
+			log.Errorf("can't publish ImageSet uuid=%v wasn't found in native-store", uuid)
+		}
 	}
 }
 
-func (r *notifyingRepublisher) republishUUIDFromCollection(uuid string, republishScope string, tidPrefix string, system targetSystem) (wasFound bool) {
-	if republishScope != scopeBoth && republishScope != system.scope {
-		return true
-	}
+func (r *notifyingRepublisher) republishUUIDFromCollection(uuid string, tidPrefix string, system targetSystem) (wasFound bool) {
 	nativeContent, isFound, err := r.nativeStoreClient.GetNative(system.name, uuid, "tid_test")
 	if err != nil {
 		log.Warnf("error while fetching native content: %v", err)
@@ -55,6 +71,6 @@ func (r *notifyingRepublisher) republishUUIDFromCollection(uuid string, republis
 //to return errors instead of logging for testability
 //decide on what to expose at interface. done.
 //have yourself a merry little christmas
-//if not found try document store, maybe it's an image set, then try again. how? recursively or how will it work?
+//if not found try document store, maybe it's an image set, then try again. how? recursively or how will it work? done.
 //parallelize, rate limit. done.
-//scope is part of RepublishUUID not republishUUIDFromCollection? decide.
+//scope is part of RepublishUUID not republishUUIDFromCollection? decide. done.

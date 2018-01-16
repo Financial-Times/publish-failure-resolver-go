@@ -136,7 +136,8 @@ func main() {
 		httpClient := setupHTTPClient()
 		nativeStoreClient := newNativeStoreClient(httpClient, "https://"+*sourceEnvHost+"/__nativerw/", *sourceAuth)
 		notifierClient, err := newHTTPNotifier(httpClient, "https://"+*targetEnvHost+"/__", *targetAuth)
-		republisher := newNotifyingRepublisher(notifierClient, nativeStoreClient)
+		docStoreClient, err := newHTTPDocStore(httpClient, "https://"+*targetEnvHost+"/__document-store-api/content", *targetAuth)
+		republisher := newNotifyingRepublisher(notifierClient, docStoreClient, nativeStoreClient)
 		parallelRepublisher := newNotifyingParallelRepublisher(republisher, *parallelism, time.Duration(*rateLimitMs)*time.Millisecond)
 		if err != nil {
 			log.Fatalf("Couldn't create notifier client. %v", err)
