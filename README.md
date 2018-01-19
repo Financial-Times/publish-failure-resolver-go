@@ -25,7 +25,7 @@ go build .
 ## Running locally
 
 ```
-./publish-failure-resolver-go --sourceEnvHost="pub-xp-up.ft.com" --targetEnvHost="pub-xp-up.ft.com" --deliveryEnvHost="xp-up.ft.com" --contentUuidList="674697de-fbb5-11e7-9b32-d7d59aace167 df6e71a2-d039-11e7-9dbb-291a884dd8c6 51bcfa75-5341-36e8-a2e8-b9f9d35d435f a7ad0dea-fc63-11e7-059a-92b661d49f6c" --transactionIdPrefix="test" --republishScope="both" --sourceAuth "Basic efgh" --targetAuth "Basic vxyz" --deliveryAuth "Basic abcd"
+./publish-failure-resolver-go --sourceEnvHost="pub-xp-up.ft.com" --targetEnvHost="pub-xp-up.ft.com" --deliveryEnvHost="xp-up.ft.com" --uuidList="674697de-fbb5-11e7-9b32-d7d59aace167 df6e71a2-d039-11e7-9dbb-291a884dd8c6 51bcfa75-5341-36e8-a2e8-b9f9d35d435f a7ad0dea-fc63-11e7-059a-92b661d49f6c" --transactionIdPrefix="test" --republishScope="both" --sourceAuth "Basic efgh" --targetAuth "Basic vxyz" --deliveryAuth "Basic abcd"
 ```
 
 The options are all mandatory and they are self-explanatory, listed above.

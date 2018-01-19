@@ -77,10 +77,10 @@ func main() {
 		Value: "",
 		Desc:  "Delivery environment's full hostname, used for accessing document-store-api (e.g. xp-up.ft.com or upp-k8s-delivery-test-eu.ft.com)",
 	})
-	contentUuidsList := app.String(cli.StringOpt{
-		Name:  "contentUuidList",
+	uuidList := app.String(cli.StringOpt{
+		Name:  "uuidList",
 		Value: "",
-		Desc:  "Content uuid list",
+		Desc:  "Uuid list that you want to repbulish.",
 	})
 	transactionIDPrefix := app.String(cli.StringOpt{
 		Name:  "transactionIdPrefix",
@@ -140,8 +140,8 @@ func main() {
 			log.Fatalf("Couldn't create notifier client. %v", err)
 		}
 
-		uuids := regSplit(*contentUuidsList, "\\s")
-		log.Infof("contentUuidsList=%v", uuids)
+		uuids := regSplit(*uuidList, "\\s")
+		log.Infof("uuidList=%v", uuids)
 		parallelRepublisher.Republish(uuids, *republishScope, *transactionIDPrefix)
 	}
 	err := app.Run(os.Args)
