@@ -126,17 +126,15 @@ func main() {
 		log.Infof("sourceEnvHost=%v", *sourceEnvHost)
 		log.Infof("targetEnvHost=%v", *targetEnvHost)
 		log.Infof("deliveryEnvHost=%v", *deliveryEnvHost)
-		log.Infof("contentUuidsList=%v", *contentUuidsList)
 		log.Infof("transactionIdPrefix=%v", *transactionIDPrefix)
 		log.Infof("republishScope=%v", *republishScope)
 		log.Infof("rateLimitMs=%v", *rateLimitMs)
 		log.Infof("parallelism=%v", *parallelism)
-		log.Infof("%v", (*deliveryAuth)[:1])
 
 		httpClient := setupHTTPClient()
 		nativeStoreClient := newNativeStoreClient(httpClient, "https://"+*sourceEnvHost+"/__nativerw/", *sourceAuth)
 		notifierClient, err := newHTTPNotifier(httpClient, "https://"+*targetEnvHost+"/__", *targetAuth)
-		docStoreClient, err := newHTTPDocStore(httpClient, "https://"+*targetEnvHost+"/__document-store-api/content", *targetAuth)
+		docStoreClient, err := newHTTPDocStore(httpClient, "https://"+*deliveryEnvHost+"/__document-store-api/content", *deliveryAuth)
 		republisher := newNotifyingRepublisher(notifierClient, docStoreClient, nativeStoreClient)
 		parallelRepublisher := newNotifyingParallelRepublisher(republisher, *parallelism, time.Duration(*rateLimitMs)*time.Millisecond)
 		if err != nil {
@@ -144,6 +142,7 @@ func main() {
 		}
 
 		uuids := regSplit(*contentUuidsList, "\\s")
+		log.Infof("contentUuidsList=%v", uuids)
 		parallelRepublisher.Republish(uuids, *republishScope, *transactionIDPrefix)
 	}
 	err := app.Run(os.Args)

@@ -40,6 +40,7 @@ func (c *httpDocStore) GetImageSetsModelUUID(setUUID, tid string) (found bool, m
 	}
 	req.Header.Add(transactionidutils.TransactionIDHeader, tid)
 	req.Header.Add("Authorization", c.authHeader)
+	log.Info("url=%v", req.URL.String())
 	resp, err := c.httpClient.Do(req)
 	if err != nil {
 		return false, "", fmt.Errorf("unsucessful request for getting uuid=%v %v", setUUID, err)
@@ -74,6 +75,7 @@ func (c *httpDocStore) obtainImageModelUUID(bodyAsBytes []byte, setUUID, tid str
 		return false, "", nil
 	}
 	if len(content.Members) != 1 {
+		log.Warnf("ImageSet is not of that type that has only one member. Those elements should be repbublished by using their own uuids, or enhancing this script to be able to.")
 		return false, "", nil
 	}
 	return true, content.Members[0].UUID, nil

@@ -43,9 +43,10 @@ func (r *notifyingRepublisher) RepublishUUID(uuid string, republishScope string,
 			log.Errorf("can't publish uuid=%v wasn't found in any of the native-store's collections and it's not an ImageSet", uuid)
 			return
 		}
+		log.Infof("uuid=%v was found to be an ImageSet having an imageModelUUID=%v", uuid, imageModelUUID)
 		isFound := r.republishUUIDFromCollection(imageModelUUID, tidPrefix, collections["methode"])
 		if !isFound {
-			log.Errorf("can't publish ImageSet uuid=%v wasn't found in native-store", uuid)
+			log.Errorf("can't publish imageModelUUID=%v of imageSetUuid=%v wasn't found in native-store", imageModelUUID, uuid)
 		}
 	}
 }
