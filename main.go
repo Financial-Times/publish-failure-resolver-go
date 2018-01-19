@@ -9,7 +9,6 @@ import (
 
 	log "github.com/Sirupsen/logrus"
 	"github.com/jawher/mow.cli"
-	//uuidutils "github.com/Financial-Times/uuid-utils-go"
 )
 
 const (
