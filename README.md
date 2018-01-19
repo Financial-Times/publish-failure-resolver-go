@@ -29,3 +29,7 @@ go build .
 ```
 
 The options are all mandatory and they are self-explanatory, listed above.
+
+## Notes
+
+The respective [jenkins job can be found here](http://ftjen06609-lvpr-uk-p:8181). Search for _Republish Failed Content and Metadata k8s go_
