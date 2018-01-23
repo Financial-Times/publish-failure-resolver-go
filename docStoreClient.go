@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"net/http"
 	"net/url"
@@ -45,7 +46,9 @@ func (c *httpDocStore) GetImageSetsModelUUID(setUUID, tid string) (found bool, m
 	if err != nil {
 		return false, "", fmt.Errorf("unsucessful request for getting uuid=%v %v", setUUID, err)
 	}
+	defer niceClose(resp)
 	if resp.StatusCode == http.StatusNotFound {
+		io.Copy(ioutil.Discard, resp.Body)
 		return false, "", nil
 	}
 	if resp.StatusCode != http.StatusOK {
@@ -55,7 +58,6 @@ func (c *httpDocStore) GetImageSetsModelUUID(setUUID, tid string) (found bool, m
 		}
 		return false, "", fmt.Errorf("unexpected status while getting from document-store-api uuid=%v status=%v %v", setUUID, resp.StatusCode, string(bodyAsBytes))
 	}
-	defer niceClose(resp)
 
 	bodyAsBytes, err := ioutil.ReadAll(resp.Body)
 	if err != nil {

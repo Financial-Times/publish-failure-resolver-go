@@ -75,3 +75,4 @@ func (r *notifyingRepublisher) republishUUIDFromCollection(uuid string, tidPrefi
 //if not found try document store, maybe it's an image set, then try again. how? recursively or how will it work? done.
 //parallelize, rate limit. done.
 //scope is part of RepublishUUID not republishUUIDFromCollection? decide. done.
+//fix

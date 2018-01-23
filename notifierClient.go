@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"io"
 	"io/ioutil"
 	"net/http"
 	"net/url"
@@ -43,7 +44,6 @@ func (c *httpNotifier) Notify(nativeContent []byte, notifierApp, originSystemID,
 	req.Header.Add("Authorization", c.authHeader)
 	req.Header.Add("Content-Type", "application/json")
 	req.Header.Add("X-Origin-System-Id", originSystemID)
-	// log.Infof("Notify url=%v", notifierURL.String())
 	resp, err := c.httpClient.Do(req)
 	if err != nil {
 		return fmt.Errorf("unsucessful request for notifying for uuid=%v %v", uuid, err)
@@ -55,6 +55,7 @@ func (c *httpNotifier) Notify(nativeContent []byte, notifierApp, originSystemID,
 		}
 		return fmt.Errorf("unexpected status while notifying for uuid=%v status=%v %v", uuid, resp.StatusCode, string(bodyAsBytes))
 	}
+	io.Copy(ioutil.Discard, resp.Body)
 	niceClose(resp)
 	return nil
 }
