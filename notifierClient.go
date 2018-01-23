@@ -44,6 +44,7 @@ func (c *httpNotifier) Notify(nativeContent []byte, notifierApp, originSystemID,
 	req.Header.Add("Authorization", c.authHeader)
 	req.Header.Add("Content-Type", "application/json")
 	req.Header.Add("X-Origin-System-Id", originSystemID)
+	req.Header.Set("Connection", "close")
 	resp, err := c.httpClient.Do(req)
 	if err != nil {
 		return fmt.Errorf("unsucessful request for notifying for uuid=%v %v", uuid, err)

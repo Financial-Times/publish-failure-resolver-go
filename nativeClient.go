@@ -40,22 +40,24 @@ func (c *nativeStoreClient) GetNative(collection, uuid, tid string) (nativeConte
 	}
 	req.Header.Add(transactionidutils.TransactionIDHeader, tid)
 	req.Header.Add("Authorization", c.authHeader)
+	req.Header.Set("Connection", "close")
 	resp, err := c.httpClient.Do(req)
 	if err != nil {
 		return nil, false, fmt.Errorf("unsucessful request for fetching native content uuid=%v %v", uuid, err)
 	}
+	defer niceClose(resp)
 	if resp.StatusCode == http.StatusNotFound {
+		io.Copy(ioutil.Discard, resp.Body)
 		return nil, false, nil
 	}
 	if resp.StatusCode != http.StatusOK {
+		io.Copy(ioutil.Discard, resp.Body)
 		return nil, false, fmt.Errorf("unexpected status while fetching native content uuid=%v collection=%v status=%v", uuid, collection, resp.StatusCode)
 	}
 	bodyAsBytes, err := ioutil.ReadAll(resp.Body)
-	defer niceClose(resp)
 	if err != nil {
 		return nil, true, fmt.Errorf("failed to read response body for uuid=%v %v", uuid, err)
 	}
-	ioutil.ReadAll(resp.Body)
 	return bodyAsBytes, true, nil
 }
 

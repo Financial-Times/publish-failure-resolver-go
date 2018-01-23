@@ -41,6 +41,7 @@ func (c *httpDocStore) GetImageSetsModelUUID(setUUID, tid string) (found bool, m
 	}
 	req.Header.Add(transactionidutils.TransactionIDHeader, tid)
 	req.Header.Add("Authorization", c.authHeader)
+	req.Header.Set("Connection", "close")
 	log.Info("url=%v", req.URL.String())
 	resp, err := c.httpClient.Do(req)
 	if err != nil {
