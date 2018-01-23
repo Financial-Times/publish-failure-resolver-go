@@ -11,20 +11,20 @@
 			"versionExact": "v0.2.0"
 		},
 		{
-			"checksumSHA1": "yL7+xJ/LiY7OiN4vO3/R458/6qo=",
-			"path": "github.com/Sirupsen/logrus",
-			"revision": "f006c2ac4710855cf0f916dd6b77acf6b048dc6e",
-			"revisionTime": "2017-08-15T20:20:55Z",
-			"version": "v1.0.3",
-			"versionExact": "v1.0.3"
-		},
-		{
 			"checksumSHA1": "I7AAXZqD3Dy5KjQ9N+2/iHzlKzc=",
 			"path": "github.com/jawher/mow.cli",
 			"revision": "a459d5906bb7a9c5eda7c4d02eec7c541120226e",
 			"revisionTime": "2017-08-20T16:57:35Z",
 			"version": "v1.0.1",
 			"versionExact": "v1.0.1"
+		},
+		{
+			"checksumSHA1": "5+eS1Ticg5wkpsdNoPiST3OQcIg=",
+			"path": "github.com/sirupsen/logrus",
+			"revision": "f006c2ac4710855cf0f916dd6b77acf6b048dc6e",
+			"revisionTime": "2017-08-15T20:20:55Z",
+			"version": "v1.0.3",
+			"versionExact": "v1.0.3"
 		}
 	],
 	"rootPath": "github.com/Financial-Times/publish-failure-resolver-go"

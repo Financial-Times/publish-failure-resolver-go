@@ -10,7 +10,7 @@ import (
 	"bytes"
 
 	"github.com/Financial-Times/transactionid-utils-go"
-	log "github.com/Sirupsen/logrus"
+	log "github.com/sirupsen/logrus"
 )
 
 type notifierClient interface {
