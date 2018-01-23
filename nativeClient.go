@@ -54,6 +54,7 @@ func (c *nativeStoreClient) GetNative(collection, uuid, tid string) (nativeConte
 	if err != nil {
 		return nil, true, fmt.Errorf("failed to read response body for uuid=%v %v", uuid, err)
 	}
+	ioutil.ReadAll(resp.Body)
 	return bodyAsBytes, true, nil
 }
 
