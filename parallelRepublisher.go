@@ -1,38 +1,69 @@
 package main
 
 import (
-	"sync"
+	"time"
+
+	"github.com/Financial-Times/publish-failure-resolver-go/workbalancer"
+	log "github.com/sirupsen/logrus"
 )
 
 type parallelRepublisher interface {
-	Republish(uuids []string, republishScope string, tidPrefix string)
+	Republish(uuids []string, publishScope string, tidPrefix string)
 }
 
 type notifyingParallelRepublisher struct {
-	republishers []sequentialRepublisher
-	wg           *sync.WaitGroup
+	republisher singleRepublisher
+	balancer    workbalancer.Workbalancer
+	rateLimit   time.Duration
+	parallelism int
 }
 
-func newNotifyingParallelRepublisher(sequentialRepublisherConstructor func() sequentialRepublisher, parallelism int) *notifyingParallelRepublisher {
-	var republishers []sequentialRepublisher
-	for i := 0; i < parallelism; i++ {
-		republishers = append(republishers, sequentialRepublisherConstructor())
+func newNotifyingParallelRepublisher(republisher singleRepublisher, rateLimit time.Duration, parallelism int) *notifyingParallelRepublisher {
+	return &notifyingParallelRepublisher{
+		republisher: republisher,
+		balancer:    workbalancer.NewChannelBalancer(parallelism),
+		rateLimit:   rateLimit,
 	}
-	var wg sync.WaitGroup
-	wg.Add(parallelism)
-	return &notifyingParallelRepublisher{republishers, &wg}
 }
 
-func (r *notifyingParallelRepublisher) Republish(uuids []string, republishScope string, tidPrefix string) {
-	var uuidSegments [][]string
-	for i, uuid := range uuids {
-		segmentI := i % len(r.republishers)
-		uuidSegments[segmentI] = append(uuidSegments[segmentI], uuid)
+func (r *notifyingParallelRepublisher) Republish(uuids []string, publishScope string, tidPrefix string) {
+	results := r.balancer.GetResults()
+	go printResults(results)
+	var workloads []workbalancer.Workload
+	for _, uuid := range uuids {
+		workloads = append(workloads, &publishWork{
+			uuid:         uuid,
+			republisher:  r.republisher,
+			publishScope: publishScope,
+			tidPrefix:    tidPrefix,
+			limiter:      time.Tick(r.rateLimit),
+		})
 	}
+	r.balancer.Balance(workloads)
+}
 
-	for _, seqRepublisher := range r.republishers {
-		go seqRepublisher.Republish(uuids, republishScope, tidPrefix)
+func printResults(results <-chan workbalancer.WorkResult) {
+	for result := range results {
+		errorResult, ok := result.(error)
+		if !ok {
+			log.Errorf("A publish's result was not of correct type. result=%v", result)
+		}
+		if errorResult != nil {
+			log.Errorf("Error publishing: %v", errorResult)
+		}
 	}
+}
 
-	r.wg.Wait()
+type publishWork struct {
+	uuid         string
+	publishScope string
+	tidPrefix    string
+	limiter      <-chan time.Time
+	republisher  singleRepublisher
+}
+
+func (w *publishWork) Do() workbalancer.WorkResult {
+	<-w.limiter
+	w.republisher.Republish(w.uuid, w.publishScope, w.tidPrefix)
+	return nil
 }
