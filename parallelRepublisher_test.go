@@ -1,45 +1,39 @@
 package main
 
-import (
-	"testing"
+// func TestSingle_Ok(t *testing.T) {
+// 	mockedRepublisher := new(mockedRepublisher)
 
-	"github.com/stretchr/testify/mock"
-)
+// 	mockedRepublisher.On("RepublishUUID", "19cf2763-90b1-40db-90e7-e813425ebe81", scopeBoth, "prefix1").Return()
 
-func TestSingle_Ok(t *testing.T) {
-	mockedRepublisher := new(mockedRepublisher)
+// 	pRepublisher := newNotifyingParallelRepublisher(mockedRepublisher, 1, 1)
 
-	mockedRepublisher.On("RepublishUUID", "19cf2763-90b1-40db-90e7-e813425ebe81", scopeBoth, "prefix1").Return()
+// 	pRepublisher.Republish([]string{"19cf2763-90b1-40db-90e7-e813425ebe81"}, scopeBoth, "prefix1")
 
-	pRepublisher := newNotifyingParallelRepublisher(mockedRepublisher, 1, 1)
+// 	mock.AssertExpectationsForObjects(t, mockedRepublisher)
+// }
 
-	pRepublisher.Republish([]string{"19cf2763-90b1-40db-90e7-e813425ebe81"}, scopeBoth, "prefix1")
+// func TestParallel_Ok(t *testing.T) {
+// 	mockedRepublisher := new(mockedRepublisher)
 
-	mock.AssertExpectationsForObjects(t, mockedRepublisher)
-}
+// 	n := 10
+// 	uuids := []string{}
+// 	for i := 0; i < n; i++ {
+// 		uuids = append(uuids, "19cf2763-90b1-40db-90e7-e813425ebe81")
+// 	}
 
-func TestParallel_Ok(t *testing.T) {
-	mockedRepublisher := new(mockedRepublisher)
+// 	mockedRepublisher.On("RepublishUUID", "19cf2763-90b1-40db-90e7-e813425ebe81", scopeBoth, "prefix1").Times(n).Return()
 
-	n := 10
-	uuids := []string{}
-	for i := 0; i < n; i++ {
-		uuids = append(uuids, "19cf2763-90b1-40db-90e7-e813425ebe81")
-	}
+// 	pRepublisher := newNotifyingParallelRepublisher(mockedRepublisher, 2, 1)
 
-	mockedRepublisher.On("RepublishUUID", "19cf2763-90b1-40db-90e7-e813425ebe81", scopeBoth, "prefix1").Times(n).Return()
+// 	pRepublisher.Republish(uuids, scopeBoth, "prefix1")
 
-	pRepublisher := newNotifyingParallelRepublisher(mockedRepublisher, 2, 1)
+// 	mock.AssertExpectationsForObjects(t, mockedRepublisher)
+// }
 
-	pRepublisher.Republish(uuids, scopeBoth, "prefix1")
+// type mockedRepublisher struct {
+// 	mock.Mock
+// }
 
-	mock.AssertExpectationsForObjects(t, mockedRepublisher)
-}
-
-type mockedRepublisher struct {
-	mock.Mock
-}
-
-func (m *mockedRepublisher) RepublishUUID(uuid string, republishScope string, tidPrefix string) {
-	_ = m.Called(uuid, republishScope, tidPrefix)
-}
+// func (m *mockedRepublisher) RepublishUUID(uuid string, republishScope string, tidPrefix string) {
+// 	_ = m.Called(uuid, republishScope, tidPrefix)
+// }
