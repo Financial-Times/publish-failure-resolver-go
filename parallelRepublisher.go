@@ -34,8 +34,5 @@ func (r *notifyingParallelRepublisher) Republish(uuids []string, republishScope 
 		go seqRepublisher.Republish(uuids, republishScope, tidPrefix)
 	}
 
-	for _, ql := range r.queues {
-		close(ql.q)
-	}
 	r.wg.Wait()
 }

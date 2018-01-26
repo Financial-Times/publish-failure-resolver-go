@@ -11,7 +11,7 @@ type notifyingSequentialRepublisher struct {
 	republisher singleRepublisher
 }
 
-func newNotifyingSequentialRepublisher(republisher singleRepublisher, rateLimit time.Duration) *notifyingSequentialRepublisher {
+func newNotifyingSequentialRepublisher(republisher singleRepublisher, rateLimit time.Duration) sequentialRepublisher {
 	return &notifyingSequentialRepublisher{
 		limiter:     time.Tick(rateLimit),
 		republisher: republisher,
