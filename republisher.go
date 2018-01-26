@@ -5,21 +5,21 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-type republisher interface {
-	RepublishUUID(uuid string, republishScope string, tidPrefix string)
+type singleRepublisher interface {
+	Republish(uuid string, republishScope string, tidPrefix string)
 }
 
-type notifyingRepublisher struct {
+type notifyingSingleRepublisher struct {
 	notifierClient    notifierClient
 	docStoreClient    docStoreClient
 	nativeStoreClient nativeStoreClientInterface
 }
 
-func newNotifyingRepublisher(notifierClient notifierClient, docStoreClient docStoreClient, nativeStoreClient nativeStoreClientInterface) *notifyingRepublisher {
-	return &notifyingRepublisher{notifierClient, docStoreClient, nativeStoreClient}
+func newNotifyingSingleRepublisher(notifierClient notifierClient, docStoreClient docStoreClient, nativeStoreClient nativeStoreClientInterface) *notifyingSingleRepublisher {
+	return &notifyingSingleRepublisher{notifierClient, docStoreClient, nativeStoreClient}
 }
 
-func (r *notifyingRepublisher) RepublishUUID(uuid string, republishScope string, tidPrefix string) {
+func (r *notifyingSingleRepublisher) Republish(uuid string, republishScope string, tidPrefix string) {
 	isFoundInAnyCollection := false
 	isScopedInAnyCollection := false
 	for _, system := range collections {
@@ -27,7 +27,7 @@ func (r *notifyingRepublisher) RepublishUUID(uuid string, republishScope string,
 			continue
 		}
 		isScopedInAnyCollection = true
-		isFound := r.republishUUIDFromCollection(uuid, tidPrefix, system)
+		isFound := r.republishFromCollection(uuid, tidPrefix, system)
 		if isFound {
 			isFoundInAnyCollection = true
 		}
@@ -44,14 +44,14 @@ func (r *notifyingRepublisher) RepublishUUID(uuid string, republishScope string,
 			return
 		}
 		log.Infof("uuid=%v was found to be an ImageSet having an imageModelUUID=%v", uuid, imageModelUUID)
-		isFound := r.republishUUIDFromCollection(imageModelUUID, tidPrefix, collections["methode"])
+		isFound := r.republishFromCollection(imageModelUUID, tidPrefix, collections["methode"])
 		if !isFound {
 			log.Errorf("can't publish imageModelUUID=%v of imageSetUuid=%v wasn't found in native-store", imageModelUUID, uuid)
 		}
 	}
 }
 
-func (r *notifyingRepublisher) republishUUIDFromCollection(uuid string, tidPrefix string, system targetSystem) (wasFound bool) {
+func (r *notifyingSingleRepublisher) republishFromCollection(uuid string, tidPrefix string, system targetSystem) (wasFound bool) {
 	nativeContent, isFound, err := r.nativeStoreClient.GetNative(system.name, uuid, "tid_test")
 	if err != nil {
 		log.Warnf("error while fetching native content: %v", err)

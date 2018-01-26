@@ -2,7 +2,6 @@ package main
 
 import (
 	"sync"
-	"time"
 )
 
 type parallelRepublisher interface {
@@ -10,48 +9,33 @@ type parallelRepublisher interface {
 }
 
 type notifyingParallelRepublisher struct {
-	republisher republisher
-	queues      []*queueWithLimiter
-	wg          *sync.WaitGroup
+	republishers []sequentialRepublisher
+	wg           *sync.WaitGroup
 }
 
-type queueWithLimiter struct {
-	l <-chan time.Time
-	q chan string
-}
-
-func newNotifyingParallelRepublisher(republisher republisher, parallelism int, rateLimit time.Duration) *notifyingParallelRepublisher {
-	var queues []*queueWithLimiter
+func newNotifyingParallelRepublisher(sequentialRepublisherConstructor func() sequentialRepublisher, parallelism int) *notifyingParallelRepublisher {
+	var republishers []sequentialRepublisher
 	for i := 0; i < parallelism; i++ {
-		l := time.Tick(rateLimit)
-		q := make(chan string, 1)
-		queues = append(queues, &queueWithLimiter{l, q})
+		republishers = append(republishers, sequentialRepublisherConstructor())
 	}
 	var wg sync.WaitGroup
 	wg.Add(parallelism)
-	return &notifyingParallelRepublisher{republisher, queues, &wg}
+	return &notifyingParallelRepublisher{republishers, &wg}
 }
 
 func (r *notifyingParallelRepublisher) Republish(uuids []string, republishScope string, tidPrefix string) {
-	for _, ql := range r.queues {
-		go r.republishFromQueue(ql, republishScope, tidPrefix)
+	var uuidSegments [][]string
+	for i, uuid := range uuids {
+		segmentI := i % len(r.republishers)
+		uuidSegments[segmentI] = append(uuidSegments[segmentI], uuid)
 	}
 
-	for i, uuid := range uuids {
-		qi := i % len(r.queues)
-		r.queues[qi].q <- uuid
+	for _, seqRepublisher := range r.republishers {
+		go seqRepublisher.Republish(uuids, republishScope, tidPrefix)
 	}
 
 	for _, ql := range r.queues {
 		close(ql.q)
 	}
 	r.wg.Wait()
-}
-
-func (r *notifyingParallelRepublisher) republishFromQueue(ql *queueWithLimiter, republishScope string, tidPrefix string) {
-	for uuid := range ql.q {
-		<-ql.l
-		r.republisher.RepublishUUID(uuid, republishScope, tidPrefix)
-	}
-	r.wg.Done()
 }

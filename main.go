@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"os"
 	"regexp"
+	"strings"
 	"time"
 
 	"github.com/jawher/mow.cli"
@@ -153,7 +154,7 @@ func main() {
 
 func regSplit(text string, delimeter string) []string {
 	reg := regexp.MustCompile(delimeter)
-	indexes := reg.FindAllStringIndex(text, -1)
+	indexes := reg.FindAllStringIndex(strings.TrimSpace(text), -1)
 	laststart := 0
 	result := make([]string, len(indexes)+1)
 	for i, element := range indexes {
