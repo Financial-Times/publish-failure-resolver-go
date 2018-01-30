@@ -99,10 +99,50 @@ func TestNoWorker_Ok(t *testing.T) {
 	}
 }
 
+// This basically tests that if there are two greater workloads, and a lot of small ones, and only two threads,
+// then the total amount of time will be just the sum of the workloads and no threads will block waiting, not doing anything.
+func TestTimeSumsWorkloadTimePerNumberOfWorkersEvenOnUnevenWorkUnits_Ok(t *testing.T) {
+	var workloads []Workload
+	n := 16
+	u := 50
+	workloads = append(workloads, &timeWork{t: time.Duration(n*u) * time.Millisecond})
+	for i := 0; i < n-2; i++ {
+		workloads = append(workloads, &timeWork{t: time.Duration(u) * time.Millisecond})
+	}
+	workloads = append(workloads, &timeWork{t: time.Duration(n*u) * time.Millisecond})
+	balancer := NewChannelBalancer(2)
+
+	start := time.Now()
+	nActualResults := 0
+	wg := &sync.WaitGroup{}
+	wg.Add(1)
+	go func() {
+		for _ = range balancer.GetResults() {
+			nActualResults++
+		}
+		wg.Done()
+	}()
+	balancer.Balance(workloads)
+	wg.Wait()
+
+	expectedEnd := start.Add(time.Duration((2*n+1)*u) * time.Millisecond)
+	assert.Equal(t, n, nActualResults)
+	assert.True(t, time.Now().Before(expectedEnd))
+}
+
 type incWork struct {
 	i int
 }
 
 func (w *incWork) Do() WorkResult {
 	return w.i + 1
+}
+
+type timeWork struct {
+	t time.Duration
+}
+
+func (w *timeWork) Do() WorkResult {
+	time.Sleep(w.t)
+	return true
 }
