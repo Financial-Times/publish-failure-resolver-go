@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"github.com/Financial-Times/publish-failure-resolver-go/workbalancer"
+	transactionidutils "github.com/Financial-Times/transactionid-utils-go"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -35,7 +36,7 @@ func (r *notifyingParallelRepublisher) Republish(uuids []string, publishScope st
 			uuid:         uuid,
 			republisher:  r.republisher,
 			publishScope: publishScope,
-			tidPrefix:    tidPrefix,
+			tid:          tidPrefix + transactionidutils.NewTransactionID(),
 			limiter:      time.Tick(r.rateLimit),
 		})
 	}
@@ -44,12 +45,15 @@ func (r *notifyingParallelRepublisher) Republish(uuids []string, publishScope st
 
 func printResults(results <-chan workbalancer.WorkResult) {
 	for result := range results {
-		errorResult, ok := result.(error)
+		pr, ok := result.(publishResult)
 		if !ok {
 			log.Errorf("A publish's result was not of correct type. result=%v", result)
+			continue
 		}
-		if errorResult != nil {
-			log.Errorf("Error publishing: %v", errorResult)
+		if pr.err != nil {
+			log.Errorf("Error publishing uuid=%v tid=%v: %v", pr.uuid, pr.tid, pr.err)
+		} else {
+			log.Infof("Sent for publish uuid=%v tid=%v", pr.uuid, pr.tid)
 		}
 	}
 }
@@ -57,13 +61,19 @@ func printResults(results <-chan workbalancer.WorkResult) {
 type publishWork struct {
 	uuid         string
 	publishScope string
-	tidPrefix    string
+	tid          string
 	limiter      <-chan time.Time
 	republisher  singleRepublisher
 }
 
+type publishResult struct {
+	uuid string
+	tid  string
+	err  error
+}
+
 func (w *publishWork) Do() workbalancer.WorkResult {
 	<-w.limiter
-	w.republisher.Republish(w.uuid, w.publishScope, w.tidPrefix)
-	return nil
+	err := w.republisher.Republish(w.uuid, w.tid, w.publishScope)
+	return publishResult{w.uuid, w.tid, err}
 }
