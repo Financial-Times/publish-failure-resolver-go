@@ -33,7 +33,7 @@ func (r *notifyingSingleRepublisher) Republish(uuid, tidPrefix string, republish
 		isScopedInAnyCollection = true
 		isFound, err := r.republishFromCollection(uuid, tid, collection)
 		if err != nil {
-			log.Errorf("error publishing uuid=%v collection=%v", uuid, collection)
+			log.Errorf("error publishing %v", err)
 		}
 		if isFound {
 			isFoundInAnyCollection = true
@@ -44,15 +44,18 @@ func (r *notifyingSingleRepublisher) Republish(uuid, tidPrefix string, republish
 		tid := tidPrefix + transactionidutils.NewTransactionID()
 		isFoundAsImageSet, imageModelUUID, err := r.docStoreClient.GetImageSetsModelUUID(uuid, tid)
 		if err != nil {
-			log.Errorf("couldn't get ImageModel uuid from suspected ImageSet uuid=%v tid=%v %v", uuid, tid, err)
+			log.Errorf("couldn't check if it's an ImageSet containing an image inside because of an error uuid=%v tid=%v %v", uuid, tid, err)
+			return
 		}
 		if !isFoundAsImageSet {
 			log.Errorf("can't publish uuid=%v wasn't found in any of the native-store's collections and it's not an ImageSet", uuid)
+			return
 		}
 		log.Infof("uuid=%v was found to be an ImageSet having an imageModelUUID=%v", uuid, imageModelUUID)
 		isFound, err := r.republishFromCollection(imageModelUUID, tid, collections["methode"])
 		if err != nil {
-			log.Errorf("error publishing uuid=%v collection=methode", imageModelUUID)
+			log.Errorf("error publishing %v", err)
+			return
 		}
 		if !isFound {
 			log.Errorf("can't publish imageModelUUID=%v of imageSetUuid=%v wasn't found in native-store", imageModelUUID, uuid)
@@ -60,19 +63,18 @@ func (r *notifyingSingleRepublisher) Republish(uuid, tidPrefix string, republish
 	}
 }
 
-func (r *notifyingSingleRepublisher) republishFromCollection(uuid, tid string, system targetSystem) (wasFound bool, err error) {
-	nativeContent, isFound, err := r.nativeStoreClient.GetNative(system.name, uuid, tid)
+func (r *notifyingSingleRepublisher) republishFromCollection(uuid, tid string, collection targetSystem) (wasFound bool, err error) {
+	nativeContent, isFound, err := r.nativeStoreClient.GetNative(collection.name, uuid, tid)
 	if err != nil {
 		return false, fmt.Errorf("error while fetching native content: %v", err)
 	}
 	if !isFound {
 		return false, nil
 	}
-
-	log.Infof("publishing uuid=%v tid=%v collection=%v originSystemId=%v size=%vB notifierApp=%v", uuid, tid, system.name, system.originSystemID, len(nativeContent), system.notifierApp)
-	err = r.notifierClient.Notify(nativeContent, system.notifierApp, system.originSystemID, uuid, tid)
+	err = r.notifierClient.Notify(nativeContent, collection.notifierApp, collection.originSystemID, uuid, tid)
 	if err != nil {
-		return true, fmt.Errorf("can't publish uuid=%v tid=%v couldn't successfully send to notifier: %v", uuid, tid, err)
+		return true, fmt.Errorf("couldn't send to notifier uuid=%v tid=%v collection=%v originSystemId=%v size=%vB notifierApp=%v %v", uuid, tid, collection.name, collection.originSystemID, len(nativeContent), collection.notifierApp, err)
 	}
-	return false, nil
+	log.Infof("sent for publish uuid=%v tid=%v collection=%v originSystemId=%v size=%vB notifierApp=%v", uuid, tid, collection.name, collection.originSystemID, len(nativeContent), collection.notifierApp)
+	return true, nil
 }

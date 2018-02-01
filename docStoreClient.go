@@ -73,7 +73,7 @@ func (c *httpDocStore) obtainImageModelUUID(bodyAsBytes []byte, setUUID, tid str
 		return false, "", fmt.Errorf("failed to unmarshal response body for uuid=%v tid=%v: %v", setUUID, tid, jerr.Error())
 	}
 	if content.Type != "ImageSet" {
-		log.Warnf("found in document-store-api something that was not found in nativerw. Not as ImageSet but present. uuid=%v tid=%v", setUUID, tid)
+		log.Warnf("found in document-store-api something that was not found in nativerw. Not as ImageSet but present. uuid=%v tid=%v type=%v", setUUID, tid, content.Type)
 		return false, "", nil
 	}
 	if len(content.Members) != 1 {
