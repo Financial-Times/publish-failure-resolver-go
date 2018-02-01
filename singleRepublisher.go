@@ -3,11 +3,12 @@ package main
 import (
 	"fmt"
 
+	transactionidutils "github.com/Financial-Times/transactionid-utils-go"
 	log "github.com/sirupsen/logrus"
 )
 
 type singleRepublisher interface {
-	Republish(uuid, tid string, republishScope string) error
+	Republish(uuid, tid string, republishScope string)
 }
 
 type notifyingSingleRepublisher struct {
@@ -20,7 +21,7 @@ func newNotifyingSingleRepublisher(notifierClient notifierClient, docStoreClient
 	return &notifyingSingleRepublisher{notifierClient, docStoreClient, nativeStoreClient}
 }
 
-func (r *notifyingSingleRepublisher) Republish(uuid, tid string, republishScope string) error {
+func (r *notifyingSingleRepublisher) Republish(uuid, tidPrefix string, republishScope string) {
 	isFoundInAnyCollection := false
 	isScopedInAnyCollection := false
 
@@ -28,10 +29,11 @@ func (r *notifyingSingleRepublisher) Republish(uuid, tid string, republishScope 
 		if republishScope != scopeBoth && republishScope != collection.scope {
 			continue
 		}
+		tid := tidPrefix + transactionidutils.NewTransactionID()
 		isScopedInAnyCollection = true
 		isFound, err := r.republishFromCollection(uuid, tid, collection)
 		if err != nil {
-			return fmt.Errorf("error publishing uuid=%v collection=%v", uuid, collection)
+			log.Errorf("error publishing uuid=%v collection=%v", uuid, collection)
 		}
 		if isFound {
 			isFoundInAnyCollection = true
@@ -39,27 +41,27 @@ func (r *notifyingSingleRepublisher) Republish(uuid, tid string, republishScope 
 	}
 
 	if !isFoundInAnyCollection && isScopedInAnyCollection {
+		tid := tidPrefix + transactionidutils.NewTransactionID()
 		isFoundAsImageSet, imageModelUUID, err := r.docStoreClient.GetImageSetsModelUUID(uuid, tid)
 		if err != nil {
-			return fmt.Errorf("couldn't get ImageModel uuid from suspected ImageSet uuid=%v tid=%v %v", uuid, tid, err)
+			log.Errorf("couldn't get ImageModel uuid from suspected ImageSet uuid=%v tid=%v %v", uuid, tid, err)
 		}
 		if !isFoundAsImageSet {
-			return fmt.Errorf("can't publish uuid=%v wasn't found in any of the native-store's collections and it's not an ImageSet", uuid)
+			log.Errorf("can't publish uuid=%v wasn't found in any of the native-store's collections and it's not an ImageSet", uuid)
 		}
 		log.Infof("uuid=%v was found to be an ImageSet having an imageModelUUID=%v", uuid, imageModelUUID)
 		isFound, err := r.republishFromCollection(imageModelUUID, tid, collections["methode"])
 		if err != nil {
-			return fmt.Errorf("error publishing uuid=%v collection=methode", imageModelUUID)
+			log.Errorf("error publishing uuid=%v collection=methode", imageModelUUID)
 		}
 		if !isFound {
 			log.Errorf("can't publish imageModelUUID=%v of imageSetUuid=%v wasn't found in native-store", imageModelUUID, uuid)
 		}
 	}
-	return nil
 }
 
 func (r *notifyingSingleRepublisher) republishFromCollection(uuid, tid string, system targetSystem) (wasFound bool, err error) {
-	nativeContent, isFound, err := r.nativeStoreClient.GetNative(system.name, uuid, "tid_test")
+	nativeContent, isFound, err := r.nativeStoreClient.GetNative(system.name, uuid, tid)
 	if err != nil {
 		return false, fmt.Errorf("error while fetching native content: %v", err)
 	}
