@@ -1,9 +1,8 @@
 package main
 
 import (
-	"time"
-
 	"github.com/Financial-Times/publish-failure-resolver-go/workbalancer"
+	log "github.com/sirupsen/logrus"
 )
 
 type parallelRepublisher interface {
@@ -11,49 +10,58 @@ type parallelRepublisher interface {
 }
 
 type notifyingParallelRepublisher struct {
-	republisher singleRepublisher
-	balancer    workbalancer.Workbalancer
-	rateLimit   time.Duration
-	parallelism int
+	uuidRepublisher uuidRepublisher
+	balancer        workbalancer.Workbalancer
+	parallelism     int
 }
 
-func newNotifyingParallelRepublisher(republisher singleRepublisher, rateLimit time.Duration, parallelism int) *notifyingParallelRepublisher {
+func newNotifyingParallelRepublisher(uuidRepublisher uuidRepublisher, parallelism int) *notifyingParallelRepublisher {
 	return &notifyingParallelRepublisher{
-		republisher: republisher,
-		balancer:    workbalancer.NewChannelBalancer(parallelism),
-		rateLimit:   rateLimit,
+		uuidRepublisher: uuidRepublisher,
+		balancer:        workbalancer.NewChannelBalancer(parallelism),
 	}
 }
 
 func (r *notifyingParallelRepublisher) Republish(uuids []string, publishScope string, tidPrefix string) {
-	// must empty results channel
 	go func() {
-		for _ = range r.balancer.GetResults() {
+		for result := range r.balancer.GetResults() {
+			pResult, ok := result.(publishResult)
+			if !ok {
+				log.Errorf("Work result is not of expected type: %v", result)
+			}
+			for _, msg := range pResult.msgs {
+				log.Info(msg)
+			}
+			for _, err := range pResult.errs {
+				log.Error(err)
+			}
 		}
 	}()
 	var workloads []workbalancer.Workload
 	for _, uuid := range uuids {
 		workloads = append(workloads, &publishWork{
-			uuid:         uuid,
-			republisher:  r.republisher,
-			publishScope: publishScope,
-			tidPrefix:    tidPrefix,
-			limiter:      time.Tick(r.rateLimit),
+			uuid:            uuid,
+			uuidRepublisher: r.uuidRepublisher,
+			publishScope:    publishScope,
+			tidPrefix:       tidPrefix,
 		})
 	}
 	r.balancer.Balance(workloads)
 }
 
 type publishWork struct {
-	uuid         string
-	publishScope string
-	tidPrefix    string
-	limiter      <-chan time.Time
-	republisher  singleRepublisher
+	uuid            string
+	publishScope    string
+	tidPrefix       string
+	uuidRepublisher uuidRepublisher
+}
+
+type publishResult struct {
+	msgs []string
+	errs []error
 }
 
 func (w *publishWork) Do() workbalancer.WorkResult {
-	<-w.limiter
-	w.republisher.Republish(w.uuid, w.tidPrefix, w.publishScope)
-	return nil
+	msgs, errs := w.uuidRepublisher.Republish(w.uuid, w.tidPrefix, w.publishScope)
+	return publishResult{msgs, errs}
 }
