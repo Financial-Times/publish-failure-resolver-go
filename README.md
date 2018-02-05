@@ -25,11 +25,24 @@ go build .
 ## Running locally
 
 ```
-./publish-failure-resolver-go --sourceEnvHost="pub-xp-up.ft.com" --targetEnvHost="pub-xp-up.ft.com" --deliveryEnvHost="xp-up.ft.com" --uuidList="674697de-fbb5-11e7-9b32-d7d59aace167 df6e71a2-d039-11e7-9dbb-291a884dd8c6 51bcfa75-5341-36e8-a2e8-b9f9d35d435f a7ad0dea-fc63-11e7-059a-92b661d49f6c" --transactionIdPrefix="test" --republishScope="both" --sourceAuth "Basic efgh" --targetAuth "Basic vxyz" --deliveryAuth "Basic abcd"
+./publish-failure-resolver-go \
+  --sourceEnvHost="upp-staging-publish-eu.ft.com" \
+  --targetEnvHost="upp-staging-publish-eu.ft.com" \
+  --deliveryEnvHost="upp-staging-delivery-eu.ft.com" \
+  --sourceAuth "username:password" \
+  --targetAuth "username:password" \
+  --deliveryAuth "username:password" \
+  --republishScope="both" \
+  --transactionIdPrefix="test76" \
+  --rateLimit=200 \
+  --parallelism=4 \
+  --uuidList="ab36d158-f6cd-11e7-b6fb-5914dec7ca98 2316e87a-f084-11e7-892b-b579d79a9dbc 781a1047-3401-3df1-abf9-97b4a9e557d4 74d2df3c-f207-11e7-213f-3be68cc3546d aaaaaaaa-3d10-11e5-bbd1-bbbbbbbbbbbb 74d2df3c-f207-11e7-bf59-ac7c56b7ff24"
 ```
 
-The options are all mandatory and they are self-explanatory, listed above.
+The options _rateLimit_, _parallelism_ and _scope_ are optional, the remaining are mandatory.
 
 ## Notes
+
+Rate limit applies only to notifier endpoints, so searching in native-store and in upp-store are not considered rate limited actions.
 
 The respective [jenkins job can be found here](http://ftjen06609-lvpr-uk-p:8181). Search for _Republish Failed Content and Metadata k8s go_

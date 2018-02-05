@@ -67,17 +67,17 @@ func main() {
 	sourceEnvHost := app.String(cli.StringOpt{
 		Name:  "sourceEnvHost",
 		Value: "",
-		Desc:  "Source environment's full hostname (e.g. pub-xp-up.ft.com or upp-k8s-publishing-test-eu.ft.com)",
+		Desc:  "Source environment's full hostname (e.g. upp-k8s-publishing-test-eu.ft.com or pub-xp-up.ft.com)",
 	})
 	targetEnvHost := app.String(cli.StringOpt{
 		Name:  "targetEnvHost",
 		Value: "",
-		Desc:  "Target environment's full hostname (e.g. xp-up.ft.com or upp-k8s-delivery-test-eu.ft.com)",
+		Desc:  "Target environment's full hostname (e.g. upp-k8s-delivery-test-eu.ft.com or xp-up.ft.com)",
 	})
 	deliveryEnvHost := app.String(cli.StringOpt{
 		Name:  "deliveryEnvHost",
 		Value: "",
-		Desc:  "Delivery environment's full hostname, used for accessing document-store-api (e.g. xp-up.ft.com or upp-k8s-delivery-test-eu.ft.com)",
+		Desc:  "Delivery environment's full hostname, used for accessing document-store-api (e.g. upp-k8s-delivery-test-eu.ft.com or xp-up.ft.com)",
 	})
 	uuidList := app.String(cli.StringOpt{
 		Name:  "uuidList",
@@ -92,26 +92,26 @@ func main() {
 	sourceAuth := app.String(cli.StringOpt{
 		Name:  "sourceAuth",
 		Value: "",
-		Desc:  "Source env credentials formatted as Basic auth header. (e.g. Basic abcdefg=)",
+		Desc:  "Source env credentials in format username:password (e.g. ops-01-01-2077:ABCDabcd)",
 	})
 	targetAuth := app.String(cli.StringOpt{
 		Name:  "targetAuth",
 		Value: "",
-		Desc:  "Target env credentials formatted as Basic auth header. (e.g. Basic abcdefg=)",
+		Desc:  "Target env credentials in format username:password (e.g. ops-01-01-2077:ABCDabcd)",
 	})
 	deliveryAuth := app.String(cli.StringOpt{
 		Name:  "deliveryAuth",
 		Value: "",
-		Desc:  "Delivery env credentials formatted as Basic auth header. (e.g. Basic abcdefg=)",
+		Desc:  "Delivery env credentials in format username:password (e.g. ops-01-01-2077:ABCDabcd)",
 	})
 	republishScope := app.String(cli.StringOpt{
 		Name:  "republishScope",
-		Value: "",
+		Value: "both",
 		Desc:  "Republish scope (content, metadata, both)",
 	})
 	rateLimitMs := app.Int(cli.IntOpt{
 		Name:  "rateLimitMs",
-		Value: 200,
+		Value: 1000,
 		Desc:  "Rate limit at which one thread should not republish faster. (e.g. 200ms)",
 	})
 	parallelism := app.Int(cli.IntOpt{
@@ -124,6 +124,8 @@ func main() {
 	log.Infof("[Startup] publish-failure-resolver-go is starting ")
 
 	app.Action = func() {
+		start := time.Now()
+
 		log.Infof("sourceEnvHost=%v", *sourceEnvHost)
 		log.Infof("targetEnvHost=%v", *targetEnvHost)
 		log.Infof("deliveryEnvHost=%v", *deliveryEnvHost)
@@ -147,6 +149,8 @@ func main() {
 		uuids := regSplit(*uuidList, "\\s")
 		log.Infof("uuidList=%v", uuids)
 		parallelRepublisher.Republish(uuids, *republishScope, *transactionIDPrefix)
+
+		log.Infof("Dealt with nUuids=%v in duration=%v", len(uuids), time.Duration(time.Now().UnixNano()-start.UnixNano())*time.Nanosecond)
 	}
 	err := app.Run(os.Args)
 	if err != nil {

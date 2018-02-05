@@ -23,11 +23,9 @@ func (r *notifyingUCRepublisher) RepublishUUIDFromCollection(uuid, tid string, c
 	start := time.Now()
 	nativeContent, isFound, err := r.nativeStoreClient.GetNative(collection.name, uuid, tid)
 	if err != nil {
-		extendTimeToLength(start, r.rateLimit)
 		return "", false, fmt.Errorf("error while fetching native content: %v", err)
 	}
 	if !isFound {
-		extendTimeToLength(start, r.rateLimit)
 		return "", false, nil
 	}
 	err = r.notifierClient.Notify(nativeContent, collection.notifierApp, collection.originSystemID, uuid, tid)
