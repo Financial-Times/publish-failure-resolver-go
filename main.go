@@ -28,7 +28,7 @@ type targetSystem struct {
 	scope          string
 }
 
-var collections = map[string]targetSystem{
+var defaultCollections = map[string]targetSystem{
 	"methode": {
 		name:           "methode",
 		originSystemID: "methode-web-pub",
@@ -140,7 +140,7 @@ func main() {
 		docStoreClient, err := newHTTPDocStore(httpClient, "https://"+*deliveryEnvHost+"/__document-store-api/content", "Basic "+base64.StdEncoding.EncodeToString([]byte(*deliveryAuth)))
 		rateLimit := time.Duration(*rateLimitMs) * time.Millisecond
 		uuidCollectionRepublisher := newNotifyingUCRepublisher(notifierClient, nativeStoreClient, rateLimit)
-		uuidRepublisher := newNotifyingUUIDRepublisher(uuidCollectionRepublisher, docStoreClient)
+		uuidRepublisher := newNotifyingUUIDRepublisher(uuidCollectionRepublisher, docStoreClient, defaultCollections)
 		parallelRepublisher := newNotifyingParallelRepublisher(uuidRepublisher, *parallelism)
 		if err != nil {
 			log.Fatalf("Couldn't create notifier client. %v", err)

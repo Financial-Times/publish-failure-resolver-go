@@ -14,12 +14,14 @@ type uuidRepublisher interface {
 type notifyingUUIDRepublisher struct {
 	ucRepublisher  uuidCollectionRepublisher
 	docStoreClient docStoreClient
+	collections    map[string]targetSystem
 }
 
-func newNotifyingUUIDRepublisher(uuidCollectionRepublisher uuidCollectionRepublisher, docStoreClient docStoreClient) *notifyingUUIDRepublisher {
+func newNotifyingUUIDRepublisher(uuidCollectionRepublisher uuidCollectionRepublisher, docStoreClient docStoreClient, collections map[string]targetSystem) *notifyingUUIDRepublisher {
 	return &notifyingUUIDRepublisher{
 		ucRepublisher:  uuidCollectionRepublisher,
 		docStoreClient: docStoreClient,
+		collections:    collections,
 	}
 }
 
@@ -27,7 +29,7 @@ func (r *notifyingUUIDRepublisher) Republish(uuid, tidPrefix string, republishSc
 	isFoundInAnyCollection := false
 	isScopedInAnyCollection := false
 
-	for _, collection := range collections {
+	for _, collection := range r.collections {
 		if republishScope != scopeBoth && republishScope != collection.scope {
 			continue
 		}
@@ -57,7 +59,7 @@ func (r *notifyingUUIDRepublisher) Republish(uuid, tidPrefix string, republishSc
 			return nil, errs
 		}
 		log.Infof("uuid=%v was found to be an ImageSet having an imageModelUUID=%v", uuid, imageModelUUID)
-		msg, isFound, err := r.ucRepublisher.RepublishUUIDFromCollection(imageModelUUID, tid, collections["methode"])
+		msg, isFound, err := r.ucRepublisher.RepublishUUIDFromCollection(imageModelUUID, tid, r.collections["methode"])
 		if err != nil {
 			errs = append(errs, fmt.Errorf("error publishing %v", err))
 			return nil, errs
