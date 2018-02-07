@@ -8,7 +8,7 @@ import (
 )
 
 type uuidRepublisher interface {
-	Republish(uuid, tidPrefix string, republishScope string) (msgs []string, errs []error)
+	Republish(uuid, tidPrefix string, republishScope string) (msgs []*okMsg, errs []error)
 }
 
 type notifyingUUIDRepublisher struct {
@@ -23,7 +23,7 @@ func newNotifyingUUIDRepublisher(uuidCollectionRepublisher uuidCollectionRepubli
 	}
 }
 
-func (r *notifyingUUIDRepublisher) Republish(uuid, tidPrefix string, republishScope string) (msgs []string, errs []error) {
+func (r *notifyingUUIDRepublisher) Republish(uuid, tidPrefix string, republishScope string) (msgs []*okMsg, errs []error) {
 	isFoundInAnyCollection := false
 	isScopedInAnyCollection := false
 
@@ -40,7 +40,7 @@ func (r *notifyingUUIDRepublisher) Republish(uuid, tidPrefix string, republishSc
 		if isFound {
 			isFoundInAnyCollection = true
 		}
-		if msg != "" {
+		if msg != nil {
 			msgs = append(msgs, msg)
 		}
 	}
@@ -65,7 +65,7 @@ func (r *notifyingUUIDRepublisher) Republish(uuid, tidPrefix string, republishSc
 		if !isFound {
 			errs = append(errs, fmt.Errorf("can't publish imageModelUUID=%v of imageSetUuid=%v wasn't found in native-store", imageModelUUID, uuid))
 		}
-		if msg != "" {
+		if msg != nil {
 			msgs = append(msgs, msg)
 		}
 	}

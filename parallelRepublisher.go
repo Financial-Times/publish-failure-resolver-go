@@ -1,12 +1,14 @@
 package main
 
 import (
+	"sync"
+
 	"github.com/Financial-Times/publish-failure-resolver-go/workbalancer"
 	log "github.com/sirupsen/logrus"
 )
 
 type parallelRepublisher interface {
-	Republish(uuids []string, publishScope string, tidPrefix string)
+	Republish(uuids []string, publishScope string, tidPrefix string) ([]*okMsg, []error)
 }
 
 type notifyingParallelRepublisher struct {
@@ -22,7 +24,12 @@ func newNotifyingParallelRepublisher(uuidRepublisher uuidRepublisher, parallelis
 	}
 }
 
-func (r *notifyingParallelRepublisher) Republish(uuids []string, publishScope string, tidPrefix string) {
+func (r *notifyingParallelRepublisher) Republish(uuids []string, publishScope string, tidPrefix string) ([]*okMsg, []error) {
+	var msgs []*okMsg
+	var errs []error
+	allResultsFetched := sync.WaitGroup{}
+	allResultsFetched.Add(1)
+
 	go func() {
 		for result := range r.balancer.GetResults() {
 			pResult, ok := result.(publishResult)
@@ -31,12 +38,16 @@ func (r *notifyingParallelRepublisher) Republish(uuids []string, publishScope st
 			}
 			for _, msg := range pResult.msgs {
 				log.Info(msg)
+				msgs = append(msgs, msg)
 			}
 			for _, err := range pResult.errs {
 				log.Error(err)
+				errs = append(errs, err)
 			}
 		}
+		allResultsFetched.Done()
 	}()
+
 	var workloads []workbalancer.Workload
 	for _, uuid := range uuids {
 		workloads = append(workloads, &publishWork{
@@ -47,6 +58,8 @@ func (r *notifyingParallelRepublisher) Republish(uuids []string, publishScope st
 		})
 	}
 	r.balancer.Balance(workloads)
+	allResultsFetched.Wait()
+	return msgs, errs
 }
 
 type publishWork struct {
@@ -57,7 +70,7 @@ type publishWork struct {
 }
 
 type publishResult struct {
-	msgs []string
+	msgs []*okMsg
 	errs []error
 }
 
