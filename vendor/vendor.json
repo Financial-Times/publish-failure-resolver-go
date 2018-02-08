@@ -11,6 +11,14 @@
 			"versionExact": "v0.2.0"
 		},
 		{
+			"checksumSHA1": "UVzY9J+PbFswVWcoQRml2QD/DF4=",
+			"path": "github.com/Financial-Times/workbalancer",
+			"revision": "1a512ce04f48dcc3ab610fe09c2ce22785da8d2c",
+			"revisionTime": "2018-02-08T16:03:55Z",
+			"version": "0.0.3",
+			"versionExact": "0.0.3"
+		},
+		{
 			"checksumSHA1": "CSPbwbyzqA6sfORicn4HFtIhF/c=",
 			"path": "github.com/davecgh/go-spew/spew",
 			"revision": "87df7c60d5820d0f8ae11afede5aa52325c09717",
@@ -23,14 +31,6 @@
 			"revisionTime": "2017-08-20T16:57:35Z",
 			"version": "v1.0.1",
 			"versionExact": "v1.0.1"
-		},
-		{
-			"checksumSHA1": "dof9iXGcgiwjq+Bh7YYnkwzeUPI=",
-			"path": "github.com/kovacshuni/workbalancer",
-			"revision": "1a512ce04f48dcc3ab610fe09c2ce22785da8d2c",
-			"revisionTime": "2018-02-08T16:03:55Z",
-			"version": "0.0.2",
-			"versionExact": "0.0.2"
 		},
 		{
 			"checksumSHA1": "LuFv4/jlrmFNnDb/5SCSEPAM9vU=",
