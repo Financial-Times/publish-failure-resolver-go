@@ -3,7 +3,7 @@ package main
 import (
 	"sync"
 
-	"github.com/Financial-Times/publish-failure-resolver-go/workbalancer"
+	"github.com/Financial-Times/workbalancer"
 	log "github.com/sirupsen/logrus"
 )
 

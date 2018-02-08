@@ -25,6 +25,14 @@
 			"versionExact": "v1.0.1"
 		},
 		{
+			"checksumSHA1": "dof9iXGcgiwjq+Bh7YYnkwzeUPI=",
+			"path": "github.com/kovacshuni/workbalancer",
+			"revision": "1a512ce04f48dcc3ab610fe09c2ce22785da8d2c",
+			"revisionTime": "2018-02-08T16:03:55Z",
+			"version": "0.0.2",
+			"versionExact": "0.0.2"
+		},
+		{
 			"checksumSHA1": "LuFv4/jlrmFNnDb/5SCSEPAM9vU=",
 			"path": "github.com/pmezard/go-difflib/difflib",
 			"revision": "792786c7400a136282c1664665ae0a8db921c6c2",
