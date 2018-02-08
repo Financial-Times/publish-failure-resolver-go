@@ -65,6 +65,26 @@ func TestOkAndSoftErrors_Ok(t *testing.T) {
 	assert.Equal(t, fmt.Errorf("error publishing test error let's say 401"), errs[0])
 }
 
+func TestNotScoped_Ok(t *testing.T) {
+	mockedDocStoreClient := new(mockDocStoreClient)
+	mockedUCRepublisher := new(mockUCRepublisher)
+	republisher := newNotifyingUUIDRepublisher(mockedUCRepublisher, mockedDocStoreClient, testCollectionsSingle)
+	msg := okMsg{
+		uuid:                     "b3ec9282-1073-46ad-9d44-144dad7fe956",
+		tid:                      "prefix1",
+		collectionName:           "methode",
+		collectionOriginSystemID: "methode-web-pub",
+		sizeBytes:                1024,
+		notifierAppName:          "cms-notifier",
+	}
+	mockedUCRepublisher.On("RepublishUUIDFromCollection", "b3ec9282-1073-46ad-9d44-144dad7fe956", mock.MatchedBy(func(tid string) bool { return strings.HasPrefix(tid, "prefix1") }), testCollections["methode"]).Return(&msg, true, nil)
+
+	msgs, errs := republisher.Republish("b3ec9282-1073-46ad-9d44-144dad7fe956", "prefix1", "metadata")
+
+	assert.Equal(t, 0, len(msgs))
+	assert.Equal(t, 0, len(errs))
+}
+
 func TestFoundInNoneFoundInDocStore_Ok(t *testing.T) {
 	mockedUCRepublisher := new(mockUCRepublisher)
 	msg := okMsg{
