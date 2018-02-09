@@ -11,12 +11,12 @@
 			"versionExact": "v0.2.0"
 		},
 		{
-			"checksumSHA1": "UVzY9J+PbFswVWcoQRml2QD/DF4=",
+			"checksumSHA1": "0QBxcjRhHYiAugAhDKmT0WIBnLk=",
 			"path": "github.com/Financial-Times/workbalancer",
-			"revision": "1a512ce04f48dcc3ab610fe09c2ce22785da8d2c",
-			"revisionTime": "2018-02-08T16:03:55Z",
-			"version": "0.0.3",
-			"versionExact": "0.0.3"
+			"revision": "1c97e65a6e37db8a2b463f31115a1bbf88e9ce52",
+			"revisionTime": "2018-02-09T12:10:15Z",
+			"version": "1.0.0",
+			"versionExact": "1.0.0"
 		},
 		{
 			"checksumSHA1": "CSPbwbyzqA6sfORicn4HFtIhF/c=",

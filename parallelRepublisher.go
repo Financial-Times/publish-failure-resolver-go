@@ -13,7 +13,7 @@ type parallelRepublisher interface {
 
 type notifyingParallelRepublisher struct {
 	uuidRepublisher uuidRepublisher
-	balancer        workbalancer.Workbalancer
+	balancer        workbalancer.WorkBalancer
 	parallelism     int
 }
 
@@ -74,7 +74,7 @@ type publishResult struct {
 	errs []error
 }
 
-func (w *publishWork) Do() workbalancer.WorkResult {
+func (w *publishWork) Do() workbalancer.Result {
 	msgs, errs := w.uuidRepublisher.Republish(w.uuid, w.tidPrefix, w.publishScope)
 	return publishResult{msgs, errs}
 }
