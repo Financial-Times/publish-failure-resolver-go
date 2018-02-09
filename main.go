@@ -19,6 +19,7 @@ const (
 	scopeMetadata        = "metadata"
 	collectionV1Metadata = "v1-metadata"
 	cmsNotifier          = "cms-notifier"
+	cmsMetadataNotifier  = "cms-metadata-notifier"
 )
 
 type targetSystem struct {
@@ -50,15 +51,15 @@ var defaultCollections = map[string]targetSystem{
 	"v1-metadata": {
 		name:           "v1-metadata",
 		originSystemID: "methode-web-pub",
-		notifierApp:    "cms-metadata-notifier",
+		notifierApp:    cmsMetadataNotifier,
 		scope:          scopeMetadata,
 	},
-	// "next-video-editor": {
-	// 	name:           "next-video-editor",
-	// 	originSystemID: "video-metadata",
-	// 	notifierApp:    "cms-metadata-notifier",
-	// 	scope:          scopeMetadata,
-	// },
+	"next-video-editor": {
+		name:           "video-metadata",
+		originSystemID: "next-video-editor",
+		notifierApp:    cmsMetadataNotifier,
+		scope:          scopeMetadata,
+	},
 }
 
 func main() {
