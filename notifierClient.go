@@ -1,13 +1,12 @@
 package main
 
 import (
+	"bytes"
 	"fmt"
 	"io"
 	"io/ioutil"
 	"net/http"
 	"net/url"
-
-	"bytes"
 
 	"github.com/Financial-Times/transactionid-utils-go"
 	log "github.com/sirupsen/logrus"
