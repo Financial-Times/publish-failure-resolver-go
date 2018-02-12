@@ -11,6 +11,14 @@
 			"versionExact": "v0.2.0"
 		},
 		{
+			"checksumSHA1": "SFO+8Q3GAkd8e/LaTdsJRu4OZLA=",
+			"path": "github.com/Financial-Times/uuid-utils-go",
+			"revision": "e22658edd0f130936e99079bf844bde7087c914c",
+			"revisionTime": "2017-05-16T11:04:27Z",
+			"version": "1.0.1",
+			"versionExact": "1.0.1"
+		},
+		{
 			"checksumSHA1": "O/WTQh5sctzo4/59PLsV1VXW50U=",
 			"path": "github.com/Financial-Times/workbalancer",
 			"revision": "1c97e65a6e37db8a2b463f31115a1bbf88e9ce52",
@@ -67,6 +75,12 @@
 			"versionExact": "v1.2.1"
 		},
 		{
+			"checksumSHA1": "Zqzba4X+lRAiAEn13WdFoQpn+RI=",
+			"path": "github.com/willf/bitset",
+			"revision": "1a37ad96e8c1a11b20900a232874843b5174221f",
+			"revisionTime": "2017-09-05T00:26:39Z"
+		},
+		{
 			"checksumSHA1": "6U7dCaxxIMjf5V02iWgyAwppczw=",
 			"path": "golang.org/x/crypto/ssh/terminal",
 			"revision": "9de5f2eaf759b4c4550b3db39fed2e9e5f86f45c",
@@ -89,6 +103,10 @@
 			"path": "golang.org/x/sys/windows",
 			"revision": "37707fdb30a5b38865cfb95e5aab41707daec7fd",
 			"revisionTime": "2018-02-02T13:35:31Z"
+		},
+		{
+			"path": "math/bits",
+			"revision": ""
 		}
 	],
 	"rootPath": "github.com/Financial-Times/publish-failure-resolver-go"

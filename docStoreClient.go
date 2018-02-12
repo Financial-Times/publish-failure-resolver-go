@@ -12,17 +12,13 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-type docStoreClient interface {
-	GetImageSetsModelUUID(setUUID, tid string) (found bool, modelUUID string, err error)
-}
-
 type httpDocStore struct {
 	httpClient          *http.Client
 	docStoreAddressBase string
 	authHeader          string
 }
 
-func newHTTPDocStore(httpClient *http.Client, docStoreAddressBase, authHeader string) (*httpDocStore, error) {
+func newHTTPDocStore(httpClient *http.Client, docStoreAddressBase, authHeader string) (imageSetUUIDResolver, error) {
 	return &httpDocStore{
 		httpClient:          httpClient,
 		docStoreAddressBase: docStoreAddressBase,

@@ -12,16 +12,16 @@ type uuidRepublisher interface {
 }
 
 type notifyingUUIDRepublisher struct {
-	ucRepublisher  uuidCollectionRepublisher
-	docStoreClient docStoreClient
-	collections    map[string]targetSystem
+	ucRepublisher    uuidCollectionRepublisher
+	imageSetResolver imageSetUUIDResolver
+	collections      map[string]targetSystem
 }
 
-func newNotifyingUUIDRepublisher(uuidCollectionRepublisher uuidCollectionRepublisher, docStoreClient docStoreClient, collections map[string]targetSystem) *notifyingUUIDRepublisher {
+func newNotifyingUUIDRepublisher(uuidCollectionRepublisher uuidCollectionRepublisher, imageSetResolver imageSetUUIDResolver, collections map[string]targetSystem) *notifyingUUIDRepublisher {
 	return &notifyingUUIDRepublisher{
-		ucRepublisher:  uuidCollectionRepublisher,
-		docStoreClient: docStoreClient,
-		collections:    collections,
+		ucRepublisher:    uuidCollectionRepublisher,
+		imageSetResolver: imageSetResolver,
+		collections:      collections,
 	}
 }
 
@@ -49,7 +49,7 @@ func (r *notifyingUUIDRepublisher) Republish(uuid, tidPrefix string, republishSc
 
 	if !isFoundInAnyCollection && isScopedInAnyCollection {
 		tid := tidPrefix + transactionidutils.NewTransactionID()
-		isFoundAsImageSet, imageModelUUID, err := r.docStoreClient.GetImageSetsModelUUID(uuid, tid)
+		isFoundAsImageSet, imageModelUUID, err := r.imageSetResolver.GetImageSetsModelUUID(uuid, tid)
 		if err != nil {
 			errs = append(errs, fmt.Errorf("couldn't check if it's an ImageSet containing an image inside because of an error uuid=%v tid=%v %v", uuid, tid, err))
 			return nil, errs
