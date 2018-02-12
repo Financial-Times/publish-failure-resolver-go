@@ -141,14 +141,20 @@ func main() {
 		rateLimit := time.Duration(*rateLimitMs) * time.Millisecond
 		uuidCollectionRepublisher := newNotifyingUCRepublisher(notifierClient, nativeStoreClient, rateLimit)
 		uuidRepublisher := newNotifyingUUIDRepublisher(uuidCollectionRepublisher, docStoreClient, defaultCollections)
-		parallelRepublisher := newNotifyingParallelRepublisher(uuidRepublisher, *parallelism)
+		var republisher bulkRepublisher
+		if *parallelism > 1 {
+			republisher = newNotifyingParallelRepublisher(uuidRepublisher, *parallelism)
+		} else {
+			republisher = newNotifyingSequentialRepublisher(uuidRepublisher)
+		}
+
 		if err != nil {
 			log.Fatalf("Couldn't create notifier client. %v", err)
 		}
 
 		uuids := regSplit(*uuidList, "\\s")
 		log.Infof("uuidList=%v", uuids)
-		_, errs := parallelRepublisher.Republish(uuids, *republishScope, *transactionIDPrefix)
+		_, errs := republisher.Republish(uuids, *republishScope, *transactionIDPrefix)
 
 		log.Infof("Dealt with nUuids=%v in duration=%v", len(uuids), time.Duration(time.Now().UnixNano()-start.UnixNano())*time.Nanosecond)
 

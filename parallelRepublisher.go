@@ -7,7 +7,7 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-type parallelRepublisher interface {
+type bulkRepublisher interface {
 	Republish(uuids []string, publishScope string, tidPrefix string) ([]*okMsg, []error)
 }
 
@@ -17,7 +17,7 @@ type notifyingParallelRepublisher struct {
 	parallelism     int
 }
 
-func newNotifyingParallelRepublisher(uuidRepublisher uuidRepublisher, parallelism int) *notifyingParallelRepublisher {
+func newNotifyingParallelRepublisher(uuidRepublisher uuidRepublisher, parallelism int) bulkRepublisher {
 	return &notifyingParallelRepublisher{
 		uuidRepublisher: uuidRepublisher,
 		balancer:        workbalancer.NewChannelBalancer(parallelism),
