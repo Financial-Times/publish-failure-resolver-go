@@ -148,9 +148,13 @@ func main() {
 
 		uuids := regSplit(*uuidList, "\\s")
 		log.Infof("uuidList=%v", uuids)
-		parallelRepublisher.Republish(uuids, *republishScope, *transactionIDPrefix)
+		_, errs := parallelRepublisher.Republish(uuids, *republishScope, *transactionIDPrefix)
 
 		log.Infof("Dealt with nUuids=%v in duration=%v", len(uuids), time.Duration(time.Now().UnixNano()-start.UnixNano())*time.Nanosecond)
+
+		if len(errs) > 0 {
+			os.Exit(1)
+		}
 	}
 	err := app.Run(os.Args)
 	if err != nil {
