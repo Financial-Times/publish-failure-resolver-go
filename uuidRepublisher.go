@@ -3,7 +3,7 @@ package main
 import (
 	"fmt"
 
-	transactionidutils "github.com/Financial-Times/transactionid-utils-go"
+	"github.com/Financial-Times/transactionid-utils-go"
 	log "github.com/sirupsen/logrus"
 )
 
