@@ -59,7 +59,6 @@ func TestRepublishNotFound_NotFound(t *testing.T) {
 }
 
 func TestRepublishErrNative_Err(t *testing.T) {
-	start := time.Now()
 	mockedNativeStoreClient := new(mockNativeStoreClient)
 	mockedNativeStoreClient.On("GetNative", "methode", "f3b3b579-732b-4323-affa-a316aacad213", "tid_123").Return([]byte("native"), false, fmt.Errorf("Error 401 on native client"))
 	mockedNotifierClient := new(mockNotifierClient)
@@ -71,12 +70,14 @@ func TestRepublishErrNative_Err(t *testing.T) {
 		scope:          "content",
 	}
 
+	start := time.Now()
 	msg, wasFound, err := republisher.RepublishUUIDFromCollection("f3b3b579-732b-4323-affa-a316aacad213", "tid_123", collection)
+	now := time.Now()
 
 	assert.Error(t, fmt.Errorf("Error 401 on native client"), err)
 	assert.False(t, wasFound)
 	assert.Nil(t, msg)
-	assert.True(t, time.Now().UnixNano()-start.UnixNano() < 950000, "The time limter should have no effect on native client.")
+	assert.WithinDuration(t, start, now, time.Nanosecond * 950000, "The time limiter should have no effect on native client.")
 }
 
 func TestRepublishErrNotifier_Err(t *testing.T) {
