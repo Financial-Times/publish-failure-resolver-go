@@ -17,7 +17,6 @@ const (
 	scopeBoth            = "both"
 	scopeContent         = "content"
 	scopeMetadata        = "metadata"
-	collectionV1Metadata = "v1-metadata"
 	cmsNotifier          = "cms-notifier"
 	cmsMetadataNotifier  = "cms-metadata-notifier"
 )
