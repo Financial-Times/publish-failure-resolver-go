@@ -137,20 +137,35 @@ func main() {
 		httpClient := setupHTTPClient()
 		nativeStoreClient := newNativeStoreClient(httpClient, "https://"+*sourceEnvHost+"/__nativerw/", "Basic "+base64.StdEncoding.EncodeToString([]byte(*sourceAuth)))
 		notifierClient, err := newHTTPNotifier(httpClient, "https://"+*targetEnvHost+"/__", "Basic "+base64.StdEncoding.EncodeToString([]byte(*targetAuth)))
-		docStoreClient, err := newHTTPDocStore(httpClient, "https://"+*deliveryEnvHost+"/__document-store-api/content", "Basic "+base64.StdEncoding.EncodeToString([]byte(*deliveryAuth)))
+		var imageSetResolver imageSetUUIDResolver
+		if *deliveryEnvHost == "" || *deliveryAuth == "" {
+			imageSetResolver = newUUIDImageSetResolver()
+		} else {
+			imageSetResolver, err = newHTTPDocStore(httpClient, "https://"+*deliveryEnvHost+"/__document-store-api/content", "Basic "+base64.StdEncoding.EncodeToString([]byte(*deliveryAuth)))
+		}
 		rateLimit := time.Duration(*rateLimitMs) * time.Millisecond
 		uuidCollectionRepublisher := newNotifyingUCRepublisher(notifierClient, nativeStoreClient, rateLimit)
-		uuidRepublisher := newNotifyingUUIDRepublisher(uuidCollectionRepublisher, docStoreClient, defaultCollections)
-		parallelRepublisher := newNotifyingParallelRepublisher(uuidRepublisher, *parallelism)
+		uuidRepublisher := newNotifyingUUIDRepublisher(uuidCollectionRepublisher, imageSetResolver, defaultCollections)
+		var republisher bulkRepublisher
+		if *parallelism > 1 {
+			republisher = newNotifyingParallelRepublisher(uuidRepublisher, *parallelism)
+		} else {
+			republisher = newNotifyingSequentialRepublisher(uuidRepublisher)
+		}
+
 		if err != nil {
 			log.Fatalf("Couldn't create notifier client. %v", err)
 		}
 
 		uuids := regSplit(*uuidList, "\\s")
 		log.Infof("uuidList=%v", uuids)
-		parallelRepublisher.Republish(uuids, *republishScope, *transactionIDPrefix)
+		_, errs := republisher.Republish(uuids, *republishScope, *transactionIDPrefix)
 
 		log.Infof("Dealt with nUuids=%v in duration=%v", len(uuids), time.Duration(time.Now().UnixNano()-start.UnixNano())*time.Nanosecond)
+
+		if len(errs) > 0 {
+			os.Exit(1)
+		}
 	}
 	err := app.Run(os.Args)
 	if err != nil {
