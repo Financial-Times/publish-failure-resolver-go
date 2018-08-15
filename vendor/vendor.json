@@ -3,7 +3,7 @@
 	"ignore": "test",
 	"package": [
 		{
-			"checksumSHA1": "+Lyl4SYSRLQ7Hz2MNJlGKsmXL+8=",
+			"checksumSHA1": "+sjiZBzrsk91W1A3Md1azCkZadg=",
 			"path": "github.com/Financial-Times/transactionid-utils-go",
 			"revision": "df2f00c734957c9dd651ce23ab0e0902504c7636",
 			"revisionTime": "2017-03-28T16:39:54Z",
@@ -11,7 +11,7 @@
 			"versionExact": "v0.2.0"
 		},
 		{
-			"checksumSHA1": "SFO+8Q3GAkd8e/LaTdsJRu4OZLA=",
+			"checksumSHA1": "OctXH9nxfVzFlVWD7h4K5e+x5/M=",
 			"path": "github.com/Financial-Times/uuid-utils-go",
 			"revision": "e22658edd0f130936e99079bf844bde7087c914c",
 			"revisionTime": "2017-05-16T11:04:27Z",
@@ -19,7 +19,7 @@
 			"versionExact": "1.0.1"
 		},
 		{
-			"checksumSHA1": "O/WTQh5sctzo4/59PLsV1VXW50U=",
+			"checksumSHA1": "0QBxcjRhHYiAugAhDKmT0WIBnLk=",
 			"path": "github.com/Financial-Times/workbalancer",
 			"revision": "1c97e65a6e37db8a2b463f31115a1bbf88e9ce52",
 			"revisionTime": "2018-02-09T12:10:15Z",
@@ -27,13 +27,13 @@
 			"versionExact": "1.0.0"
 		},
 		{
-			"checksumSHA1": "aENNVxKxF9h9PfvTIstiAS5I3Lg=",
+			"checksumSHA1": "CSPbwbyzqA6sfORicn4HFtIhF/c=",
 			"path": "github.com/davecgh/go-spew/spew",
 			"revision": "87df7c60d5820d0f8ae11afede5aa52325c09717",
 			"revisionTime": "2018-01-29T09:57:49Z"
 		},
 		{
-			"checksumSHA1": "uEp3WSlpTPjeOSMLHs5C96psK2g=",
+			"checksumSHA1": "I7AAXZqD3Dy5KjQ9N+2/iHzlKzc=",
 			"path": "github.com/jawher/mow.cli",
 			"revision": "a459d5906bb7a9c5eda7c4d02eec7c541120226e",
 			"revisionTime": "2017-08-20T16:57:35Z",
@@ -41,13 +41,13 @@
 			"versionExact": "v1.0.1"
 		},
 		{
-			"checksumSHA1": "R3yk3OJzuq4MVfVGX5AhkkYv1ko=",
+			"checksumSHA1": "LuFv4/jlrmFNnDb/5SCSEPAM9vU=",
 			"path": "github.com/pmezard/go-difflib/difflib",
 			"revision": "792786c7400a136282c1664665ae0a8db921c6c2",
 			"revisionTime": "2016-01-10T10:55:54Z"
 		},
 		{
-			"checksumSHA1": "8nOCTgKSFATcBfOV4+uKtXCrZv4=",
+			"checksumSHA1": "5+eS1Ticg5wkpsdNoPiST3OQcIg=",
 			"path": "github.com/sirupsen/logrus",
 			"revision": "f006c2ac4710855cf0f916dd6b77acf6b048dc6e",
 			"revisionTime": "2017-08-15T20:20:55Z",
@@ -55,19 +55,19 @@
 			"versionExact": "v1.0.3"
 		},
 		{
-			"checksumSHA1": "+IkucM/8+JlB9p9Ezp55ftFLo6w=",
+			"checksumSHA1": "6thzskcj6XrMO5kW6GlRiuTDYjU=",
 			"path": "github.com/stretchr/objx",
 			"revision": "8a3f7159479fbc75b30357fbc48f380b7320f08e",
 			"revisionTime": "2018-01-29T17:20:03Z"
 		},
 		{
-			"checksumSHA1": "fygRczENWW2FPC+Th6W/fIZNiHM=",
+			"checksumSHA1": "5QKvAdxb0E47Nzn7iI25AfgAvOI=",
 			"path": "github.com/stretchr/testify/assert",
 			"revision": "be8372ae8ec5c6daaed3cc28ebf73c54b737c240",
 			"revisionTime": "2018-02-02T15:35:43Z"
 		},
 		{
-			"checksumSHA1": "U9/BlhwJvZcI1qVVc3aN7lqWsxk=",
+			"checksumSHA1": "GxKV+q3Z/H3VsIiZ/dG3u88rnbc=",
 			"path": "github.com/stretchr/testify/mock",
 			"revision": "12b6f73e6084dad08a7c6e575284b177ecafbc71",
 			"revisionTime": "2018-01-31T22:23:50Z",
@@ -75,7 +75,7 @@
 			"versionExact": "v1.2.1"
 		},
 		{
-			"checksumSHA1": "Zqzba4X+lRAiAEn13WdFoQpn+RI=",
+			"checksumSHA1": "5amfcgkpgnDTPxm8yPfdeHUW9KQ=",
 			"path": "github.com/willf/bitset",
 			"revision": "1a37ad96e8c1a11b20900a232874843b5174221f",
 			"revisionTime": "2017-09-05T00:26:39Z"

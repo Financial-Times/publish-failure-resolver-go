@@ -77,7 +77,7 @@ func TestRepublishErrNative_Err(t *testing.T) {
 	assert.Error(t, fmt.Errorf("Error 401 on native client"), err)
 	assert.False(t, wasFound)
 	assert.Nil(t, msg)
-	assert.WithinDuration(t, start, now, time.Nanosecond * 950000, "The time limiter should have no effect on native client.")
+	assert.WithinDuration(t, start, now, time.Nanosecond*950000, "The time limiter should have no effect on native client.")
 }
 
 func TestRepublishErrNotifier_Err(t *testing.T) {
