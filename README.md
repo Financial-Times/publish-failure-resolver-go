@@ -15,11 +15,14 @@ Written in Go.
 ## Installation
 
 ```
-go get -u github.com/kardianos/govendor
-go get -u github.com/Financial-Times/publish-failure-resolver-go
-cd $GOPATH/src/github.com/Financial-Times/publish-failure-resolver-go
-govendor sync
+curl https://raw.githubusercontent.com/golang/dep/master/install.sh | sh
+mkdir $GOPATH/src/github.com/Financial-Times/publish-failure-resolver-go
+cd $GOPATH/src/github.com/Financial-Times/
+git clone https://github.com/Financial-Times/publish-failure-resolver-go.git
+cd publish-failure-resolver-go && dep ensure -vendor-only
 go build .
+
+go test ./...
 ```
 
 ## Running locally
@@ -29,9 +32,9 @@ go build .
   --sourceEnvHost="upp-staging-publish-eu.ft.com" \
   --targetEnvHost="upp-staging-publish-eu.ft.com" \
   --deliveryEnvHost="upp-staging-delivery-eu.ft.com" \
-  --sourceAuth "username:password" \
-  --targetAuth "username:password" \
-  --deliveryAuth "username:password" \
+  --sourceAuth="username:password" \
+  --targetAuth="username:password" \
+  --deliveryAuth="username:password" \
   --republishScope="both" \
   --transactionIdPrefix="test76" \
   --rateLimit=200 \
