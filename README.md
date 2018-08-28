@@ -37,7 +37,7 @@ go test ./...
   --deliveryAuth="username:password" \
   --republishScope="both" \
   --transactionIdPrefix="test76" \
-  --rateLimit=200 \
+  --rateLimitMs=200 \
   --parallelism=4 \
   --uuidList="ab36d158-f6cd-11e7-b6fb-5914dec7ca98 2316e87a-f084-11e7-892b-b579d79a9dbc 781a1047-3401-3df1-abf9-97b4a9e557d4 74d2df3c-f207-11e7-213f-3be68cc3546d aaaaaaaa-3d10-11e5-bbd1-bbbbbbbbbbbb 74d2df3c-f207-11e7-bf59-ac7c56b7ff24"
 ```
