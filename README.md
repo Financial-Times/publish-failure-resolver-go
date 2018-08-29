@@ -15,11 +15,14 @@ Written in Go.
 ## Installation
 
 ```
-go get -u github.com/kardianos/govendor
-go get -u github.com/Financial-Times/publish-failure-resolver-go
-cd $GOPATH/src/github.com/Financial-Times/publish-failure-resolver-go
-govendor sync
+curl https://raw.githubusercontent.com/golang/dep/master/install.sh | sh
+mkdir $GOPATH/src/github.com/Financial-Times/publish-failure-resolver-go
+cd $GOPATH/src/github.com/Financial-Times/
+git clone https://github.com/Financial-Times/publish-failure-resolver-go.git
+cd publish-failure-resolver-go && dep ensure -vendor-only
 go build .
+
+go test ./...
 ```
 
 ## Running locally
@@ -29,12 +32,12 @@ go build .
   --sourceEnvHost="upp-staging-publish-eu.ft.com" \
   --targetEnvHost="upp-staging-publish-eu.ft.com" \
   --deliveryEnvHost="upp-staging-delivery-eu.ft.com" \
-  --sourceAuth "username:password" \
-  --targetAuth "username:password" \
-  --deliveryAuth "username:password" \
+  --sourceAuth="username:password" \
+  --targetAuth="username:password" \
+  --deliveryAuth="username:password" \
   --republishScope="both" \
   --transactionIdPrefix="test76" \
-  --rateLimit=200 \
+  --rateLimitMs=200 \
   --parallelism=4 \
   --uuidList="ab36d158-f6cd-11e7-b6fb-5914dec7ca98 2316e87a-f084-11e7-892b-b579d79a9dbc 781a1047-3401-3df1-abf9-97b4a9e557d4 74d2df3c-f207-11e7-213f-3be68cc3546d aaaaaaaa-3d10-11e5-bbd1-bbbbbbbbbbbb 74d2df3c-f207-11e7-bf59-ac7c56b7ff24"
 ```

@@ -14,11 +14,11 @@ import (
 )
 
 const (
-	scopeBoth            = "both"
-	scopeContent         = "content"
-	scopeMetadata        = "metadata"
-	cmsNotifier          = "cms-notifier"
-	cmsMetadataNotifier  = "cms-metadata-notifier"
+	scopeBoth           = "both"
+	scopeContent        = "content"
+	scopeMetadata       = "metadata"
+	cmsNotifier         = "cms-notifier"
+	cmsMetadataNotifier = "cms-metadata-notifier"
 )
 
 type targetSystem struct {
@@ -41,11 +41,23 @@ var defaultCollections = map[string]targetSystem{
 		notifierApp:    cmsNotifier,
 		scope:          scopeContent,
 	},
+	"spark": {
+		name:           "spark",
+		originSystemID: "cct",
+		notifierApp:    cmsNotifier,
+		scope:          scopeContent,
+	},
 	"video": {
 		name:           "video",
 		originSystemID: "next-video-editor",
 		notifierApp:    cmsNotifier,
 		scope:          scopeContent,
+	},
+	"pac-metadata": {
+		name:           "pac-metadata",
+		originSystemID: "http://cmdb.ft.com/systems/pac",
+		notifierApp:    cmsMetadataNotifier,
+		scope:          scopeMetadata,
 	},
 	"v1-metadata": {
 		name:           "v1-metadata",
