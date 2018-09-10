@@ -2,87 +2,121 @@
 
 
 [[projects]]
+  digest = "1:38212fc0030b89d7be55aaf67bb91b273a4a14a026a3cee24b5e832ffe7e56ff"
   name = "github.com/Financial-Times/transactionid-utils-go"
   packages = ["."]
+  pruneopts = "UT"
   revision = "df2f00c734957c9dd651ce23ab0e0902504c7636"
   version = "v0.2.0"
 
 [[projects]]
+  digest = "1:c6529f7e93e2449829fd25678420bbe4050c6013ff8a9c47a995df5e326e77a7"
   name = "github.com/Financial-Times/uuid-utils-go"
   packages = ["."]
+  pruneopts = "UT"
   revision = "e22658edd0f130936e99079bf844bde7087c914c"
   version = "1.0.1"
 
 [[projects]]
+  digest = "1:4617b0b1e7363ec6d0dd8bfdaffeddc9391b97053decebc4d45fdf737966941a"
   name = "github.com/Financial-Times/workbalancer"
   packages = ["."]
+  pruneopts = "UT"
   revision = "1c97e65a6e37db8a2b463f31115a1bbf88e9ce52"
   version = "1.0.0"
 
 [[projects]]
+  digest = "1:a2c1d0e43bd3baaa071d1b9ed72c27d78169b2b269f71c105ac4ba34b1be4a39"
   name = "github.com/davecgh/go-spew"
   packages = ["spew"]
+  pruneopts = "UT"
   revision = "346938d642f2ec3594ed81d874461961cd0faa76"
   version = "v1.1.0"
 
 [[projects]]
+  digest = "1:408acf443d2583d226a4c45a31dba33a37a0bdf6099c79ec6b2ef592dd00f480"
   name = "github.com/jawher/mow.cli"
   packages = ["."]
+  pruneopts = "UT"
   revision = "a459d5906bb7a9c5eda7c4d02eec7c541120226e"
   version = "v1.0.1"
 
 [[projects]]
+  digest = "1:0028cb19b2e4c3112225cd871870f2d9cf49b9b4276531f03438a88e94be86fe"
   name = "github.com/pmezard/go-difflib"
   packages = ["difflib"]
+  pruneopts = "UT"
   revision = "792786c7400a136282c1664665ae0a8db921c6c2"
   version = "v1.0.0"
 
 [[projects]]
+  digest = "1:5f2aaa360f48d1711795bd88c7e45a38f86cf81e4bc01453d20983baa67e2d51"
   name = "github.com/sirupsen/logrus"
   packages = ["."]
+  pruneopts = "UT"
   revision = "f006c2ac4710855cf0f916dd6b77acf6b048dc6e"
   version = "v1.0.3"
 
 [[projects]]
+  digest = "1:ac83cf90d08b63ad5f7e020ef480d319ae890c208f8524622a2f3136e2686b02"
   name = "github.com/stretchr/objx"
   packages = ["."]
+  pruneopts = "UT"
   revision = "477a77ecc69700c7cdeb1fa9e129548e1c1c393c"
   version = "v0.1.1"
 
 [[projects]]
+  digest = "1:f58e0cd5b00b62f5b87f44b7407fb8c9b6fcfd7409eafb5d51e26c8fd33835a0"
   name = "github.com/stretchr/testify"
   packages = [
     "assert",
-    "mock"
+    "mock",
   ]
+  pruneopts = "UT"
   revision = "be8372ae8ec5c6daaed3cc28ebf73c54b737c240"
 
 [[projects]]
+  digest = "1:981fe66c332248711bafe3b5033e939cfd175e897e20a14905d4fcdc0fd68f59"
   name = "github.com/willf/bitset"
   packages = ["."]
+  pruneopts = "UT"
   revision = "1a37ad96e8c1a11b20900a232874843b5174221f"
 
 [[projects]]
+  digest = "1:38cb27d3525635c34e84e2dbc2207c37d10832776997665bf0ddaeae2c861f1f"
   name = "golang.org/x/crypto"
   packages = ["ssh/terminal"]
+  pruneopts = "UT"
   revision = "9de5f2eaf759b4c4550b3db39fed2e9e5f86f45c"
 
 [[projects]]
+  digest = "1:76ee51c3f468493aff39dbacc401e8831fbb765104cbf613b89bef01cf4bad70"
   name = "golang.org/x/net"
   packages = ["context"]
+  pruneopts = "UT"
   revision = "f5dfe339be1d06f81b22525fe34671ee7d2c8904"
 
 [[projects]]
+  digest = "1:c13f38cb4c5758bbc084ff39e191a1fe2ca2d8ee645500a179e89bd83494f2e1"
   name = "golang.org/x/sys"
   packages = [
     "unix",
-    "windows"
+    "windows",
   ]
+  pruneopts = "UT"
   revision = "37707fdb30a5b38865cfb95e5aab41707daec7fd"
 
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "9502e61bf163107c7599ae3355e523d654da5326595bf6fd4f7105366b1c3e70"
+  input-imports = [
+    "github.com/Financial-Times/transactionid-utils-go",
+    "github.com/Financial-Times/uuid-utils-go",
+    "github.com/Financial-Times/workbalancer",
+    "github.com/jawher/mow.cli",
+    "github.com/sirupsen/logrus",
+    "github.com/stretchr/testify/assert",
+    "github.com/stretchr/testify/mock",
+  ]
   solver-name = "gps-cdcl"
   solver-version = 1

@@ -14,10 +14,10 @@ type uuidRepublisher interface {
 type notifyingUUIDRepublisher struct {
 	ucRepublisher    uuidCollectionRepublisher
 	imageSetResolver imageSetUUIDResolver
-	collections      map[string]targetSystem
+	collections      map[string][]targetSystem
 }
 
-func newNotifyingUUIDRepublisher(uuidCollectionRepublisher uuidCollectionRepublisher, imageSetResolver imageSetUUIDResolver, collections map[string]targetSystem) *notifyingUUIDRepublisher {
+func newNotifyingUUIDRepublisher(uuidCollectionRepublisher uuidCollectionRepublisher, imageSetResolver imageSetUUIDResolver, collections map[string][]targetSystem) *notifyingUUIDRepublisher {
 	return &notifyingUUIDRepublisher{
 		ucRepublisher:    uuidCollectionRepublisher,
 		imageSetResolver: imageSetResolver,
@@ -30,20 +30,22 @@ func (r *notifyingUUIDRepublisher) Republish(uuid, tidPrefix string, republishSc
 	isScopedInAnyCollection := false
 
 	for _, collection := range r.collections {
-		if republishScope != scopeBoth && republishScope != collection.scope {
-			continue
-		}
-		tid := tidPrefix + transactionidutils.NewTransactionID()
-		isScopedInAnyCollection = true
-		msg, isFound, err := r.ucRepublisher.RepublishUUIDFromCollection(uuid, tid, collection)
-		if err != nil {
-			errs = append(errs, fmt.Errorf("error publishing %v", err))
-		}
-		if isFound {
-			isFoundInAnyCollection = true
-		}
-		if msg != nil {
-			msgs = append(msgs, msg)
+		for k := range collection {
+			if republishScope != scopeBoth && republishScope != collection[k].scope {
+				continue
+			}
+			tid := tidPrefix + transactionidutils.NewTransactionID()
+			isScopedInAnyCollection = true
+			msg, isFound, err := r.ucRepublisher.RepublishUUIDFromCollection(uuid, tid, collection[k])
+			if err != nil {
+				errs = append(errs, fmt.Errorf("error publishing %v", err))
+			}
+			if isFound {
+				isFoundInAnyCollection = true
+			}
+			if msg != nil {
+				msgs = append(msgs, msg)
+			}
 		}
 	}
 
@@ -59,7 +61,7 @@ func (r *notifyingUUIDRepublisher) Republish(uuid, tidPrefix string, republishSc
 			return nil, errs
 		}
 		log.Infof("uuid=%v was found to be an ImageSet having an imageModelUUID=%v", uuid, imageModelUUID)
-		msg, isFound, err := r.ucRepublisher.RepublishUUIDFromCollection(imageModelUUID, tid, r.collections["methode"])
+		msg, isFound, err := r.ucRepublisher.RepublishUUIDFromCollection(imageModelUUID, tid, r.collections["methode"][0])
 		if err != nil {
 			errs = append(errs, fmt.Errorf("error publishing %v", err))
 			return nil, errs
