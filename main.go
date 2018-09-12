@@ -26,67 +26,51 @@ type targetSystem struct {
 	originSystemID string
 	notifierApp    string
 	scope          string
-	contentType    string
 }
 
-var defaultCollections = map[string][]targetSystem{
-	"methode": {{
+var defaultCollections = map[string]targetSystem{
+	"methode": {
 		name:           "methode",
 		originSystemID: "methode-web-pub",
 		notifierApp:    cmsNotifier,
 		scope:          scopeContent,
-		contentType:    "application/json",
-	}},
-	"wordpress": {{
+	},
+	"wordpress": {
 		name:           "wordpress",
 		originSystemID: "wordpress",
 		notifierApp:    cmsNotifier,
 		scope:          scopeContent,
-		contentType:    "application/json",
-	}},
+	},
 	"spark": {
-		{
-			name:           "spark",
-			originSystemID: "cct",
-			notifierApp:    cmsNotifier,
-			scope:          scopeContent,
-			contentType:    "application/json",
-		},
-		{
-			name:           "spark",
-			originSystemID: "next-video-editor",
-			notifierApp:    cmsNotifier,
-			scope:          scopeContent,
-			contentType:    "application/vnd.ft-upp-audio+json",
-		}},
-	"video": {{
+		name:           "spark",
+		originSystemID: "cct",
+		notifierApp:    cmsNotifier,
+		scope:          scopeContent,
+	},
+	"video": {
 		name:           "video",
 		originSystemID: "next-video-editor",
 		notifierApp:    cmsNotifier,
 		scope:          scopeContent,
-		contentType:    "application/json",
-	}},
-	"pac-metadata": {{
+	},
+	"pac-metadata": {
 		name:           "pac-metadata",
 		originSystemID: "http://cmdb.ft.com/systems/pac",
 		notifierApp:    cmsMetadataNotifier,
 		scope:          scopeMetadata,
-		contentType:    "application/json",
-	}},
-	"v1-metadata": {{
+	},
+	"v1-metadata": {
 		name:           "v1-metadata",
 		originSystemID: "methode-web-pub",
 		notifierApp:    cmsMetadataNotifier,
 		scope:          scopeMetadata,
-		contentType:    "application/json",
-	}},
-	"next-video-editor": {{
+	},
+	"next-video-editor": {
 		name:           "video-metadata",
 		originSystemID: "next-video-editor",
 		notifierApp:    cmsMetadataNotifier,
 		scope:          scopeMetadata,
-		contentType:    "application/json",
-	}},
+	},
 }
 
 func main() {

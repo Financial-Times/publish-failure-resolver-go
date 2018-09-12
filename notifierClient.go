@@ -13,7 +13,7 @@ import (
 )
 
 type notifierClient interface {
-	Notify(nativeContent []byte, notifierApp, originSystemID, contentType, uuid, tid string) error
+	Notify(nativeContent []byte, notifierApp, originSystemID, uuid, tid string) error
 }
 
 type httpNotifier struct {
@@ -30,7 +30,7 @@ func newHTTPNotifier(httpClient *http.Client, notifierAddress, authHeader string
 	}, nil
 }
 
-func (c *httpNotifier) Notify(nativeContent []byte, notifierApp, originSystemID, contentType, uuid, tid string) error {
+func (c *httpNotifier) Notify(nativeContent []byte, notifierApp, originSystemID, uuid, tid string) error {
 	notifierURL, err := url.Parse(c.notifierAddressBase + notifierApp + "/notify")
 	if err != nil {
 		return fmt.Errorf("coulnd't create URL for notifierAddressBase=%v notifierApp=%v", c.notifierAddressBase, notifierApp)
@@ -41,7 +41,7 @@ func (c *httpNotifier) Notify(nativeContent []byte, notifierApp, originSystemID,
 	}
 	req.Header.Add(transactionidutils.TransactionIDHeader, tid)
 	req.Header.Add("Authorization", c.authHeader)
-	req.Header.Add("Content-Type", contentType)
+	req.Header.Add("Content-Type", "application/json")
 	req.Header.Add("X-Origin-System-Id", originSystemID)
 	req.Header.Set("Connection", "close")
 	resp, err := c.httpClient.Do(req)
