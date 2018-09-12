@@ -26,7 +26,7 @@ func newHTTPDocStore(httpClient *http.Client, docStoreAddressBase, authHeader st
 	}, nil
 }
 
-func (c *httpDocStore) GetImageSetsModelUUID(setUUID, tid string) (found bool, modelUUID string, err error) {
+func (c *httpDocStore) GetImageSetsModelUUID(setUUID, tid string) (bool, string, error) {
 	docStoreURL, err := url.Parse(c.docStoreAddressBase + "/" + setUUID)
 	if err != nil {
 		return false, "", fmt.Errorf("coulnd't create URL for docStoreAddressBase=%v uuid=%v", c.docStoreAddressBase, setUUID)
@@ -40,7 +40,7 @@ func (c *httpDocStore) GetImageSetsModelUUID(setUUID, tid string) (found bool, m
 	req.Header.Set("Connection", "close")
 	resp, err := c.httpClient.Do(req)
 	if err != nil {
-		return false, "", fmt.Errorf("unsucessful request for getting uuid=%v %v", setUUID, err)
+		return false, "", fmt.Errorf("unsuccessful request for getting uuid=%v %v", setUUID, err)
 	}
 	defer niceClose(resp)
 	if resp.StatusCode == http.StatusNotFound {

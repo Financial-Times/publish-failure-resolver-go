@@ -37,8 +37,7 @@ func (msg *okMsg) String() string {
 func deleteNativeIngesterAttr(nativeContent []byte) []byte {
 	var content map[string]interface{}
 	var nativeContentParsed []byte
-	var errParsed error
-	errParsed = json.Unmarshal(nativeContent, &content)
+	errParsed := json.Unmarshal(nativeContent, &content)
 	if errParsed == nil {
 		delete(content, "lastModified")
 		delete(content, "publishReference")

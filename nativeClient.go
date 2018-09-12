@@ -49,7 +49,7 @@ func (c *nativeStoreClient) GetNative(collection, uuid, tid string) (nMsg *nativ
 	req.Header.Set("Connection", "close")
 	resp, err := c.httpClient.Do(req)
 	if err != nil {
-		return nil, false, fmt.Errorf("unsucessful request for fetching native content uuid=%v %v", uuid, err)
+		return nil, false, fmt.Errorf("unsuccessful request for fetching native content uuid=%v %v", uuid, err)
 	}
 	defer niceClose(resp)
 	if resp.StatusCode == http.StatusNotFound {

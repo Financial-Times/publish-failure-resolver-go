@@ -46,11 +46,10 @@ func (c *httpNotifier) Notify(nMsg *nativeMSG, notifierApp, uuid, tid string) er
 		nMsg.originSystemID = "-"
 	}
 	req.Header.Add("X-Origin-System-Id", nMsg.originSystemID)
-	fmt.Println("****************", nMsg.contentType, nMsg.originSystemID)
 	req.Header.Set("Connection", "close")
 	resp, err := c.httpClient.Do(req)
 	if err != nil {
-		return fmt.Errorf("unsucessful request for notifying for uuid=%v %v", uuid, err)
+		return fmt.Errorf("unsuccessful request for notifying for uuid=%v %v", uuid, err)
 	}
 	if resp.StatusCode != http.StatusOK {
 		bodyAsBytes, err := ioutil.ReadAll(resp.Body)

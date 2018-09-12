@@ -169,7 +169,7 @@ func main() {
 			log.Fatalf("Couldn't create notifier client. %v", err)
 		}
 
-		uuids := regSplit(*uuidList, "\\s")
+		uuids := regSplit(*uuidList)
 		log.Infof("uuidList=%v", uuids)
 		_, errs := republisher.Republish(uuids, *republishScope, *transactionIDPrefix)
 
@@ -186,8 +186,8 @@ func main() {
 	}
 }
 
-func regSplit(text string, delimeter string) []string {
-	reg := regexp.MustCompile(delimeter)
+func regSplit(text string) []string {
+	reg := regexp.MustCompile("\\s")
 	indexes := reg.FindAllStringIndex(strings.TrimSpace(text), -1)
 	laststart := 0
 	result := make([]string, len(indexes)+1)
