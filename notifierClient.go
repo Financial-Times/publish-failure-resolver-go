@@ -13,7 +13,7 @@ import (
 )
 
 type notifierClient interface {
-	Notify(nativeContent []byte, notifierApp, originSystemID, uuid, tid string) error
+	Notify(nMsg *nativeMSG, notifierApp, uuid, tid string) error
 }
 
 type httpNotifier struct {
@@ -30,19 +30,23 @@ func newHTTPNotifier(httpClient *http.Client, notifierAddress, authHeader string
 	}, nil
 }
 
-func (c *httpNotifier) Notify(nativeContent []byte, notifierApp, originSystemID, uuid, tid string) error {
+func (c *httpNotifier) Notify(nMsg *nativeMSG, notifierApp, uuid, tid string) error {
 	notifierURL, err := url.Parse(c.notifierAddressBase + notifierApp + "/notify")
 	if err != nil {
 		return fmt.Errorf("coulnd't create URL for notifierAddressBase=%v notifierApp=%v", c.notifierAddressBase, notifierApp)
 	}
-	req, err := http.NewRequest(http.MethodPost, notifierURL.String(), bytes.NewReader(nativeContent))
+	req, err := http.NewRequest(http.MethodPost, notifierURL.String(), bytes.NewReader(nMsg.body))
 	if err != nil {
 		return fmt.Errorf("couldn't create request to notify for uuid=%v %v", uuid, err)
 	}
 	req.Header.Add(transactionidutils.TransactionIDHeader, tid)
 	req.Header.Add("Authorization", c.authHeader)
-	req.Header.Add("Content-Type", "application/json")
-	req.Header.Add("X-Origin-System-Id", originSystemID)
+	req.Header.Add("Content-Type", nMsg.contentType)
+	if nMsg.originSystemID == "" {
+		nMsg.originSystemID = "-"
+	}
+	req.Header.Add("X-Origin-System-Id", nMsg.originSystemID)
+	fmt.Println("****************", nMsg.contentType, nMsg.originSystemID)
 	req.Header.Set("Connection", "close")
 	resp, err := c.httpClient.Do(req)
 	if err != nil {
@@ -53,7 +57,8 @@ func (c *httpNotifier) Notify(nativeContent []byte, notifierApp, originSystemID,
 		if err != nil {
 			log.Warnf("Couldn't read response body %v", err)
 		}
-		return fmt.Errorf("unexpected status while notifying for uuid=%v status=%v %v", uuid, resp.StatusCode, string(bodyAsBytes))
+		return fmt.Errorf("unexpected status while notifying for uuid=%v content-type=%s Oringin-System-Id=%s status=%v %v", uuid, nMsg.contentType, nMsg.originSystemID,
+			resp.StatusCode, string(bodyAsBytes))
 	}
 	io.Copy(ioutil.Discard, resp.Body)
 	niceClose(resp)

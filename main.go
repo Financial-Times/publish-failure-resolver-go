@@ -31,25 +31,25 @@ type targetSystem struct {
 var defaultCollections = map[string]targetSystem{
 	"methode": {
 		name:           "methode",
-		originSystemID: "methode-web-pub",
+		originSystemID: "http://cmdb.ft.com/systems/methode-web-pub",
 		notifierApp:    cmsNotifier,
 		scope:          scopeContent,
 	},
 	"wordpress": {
 		name:           "wordpress",
-		originSystemID: "wordpress",
+		originSystemID: "http://cmdb.ft.com/systems/wordpress",
 		notifierApp:    cmsNotifier,
 		scope:          scopeContent,
 	},
 	"spark": {
 		name:           "spark",
-		originSystemID: "cct",
+		originSystemID: "http://cmdb.ft.com/systems/cct",
 		notifierApp:    cmsNotifier,
 		scope:          scopeContent,
 	},
 	"video": {
 		name:           "video",
-		originSystemID: "next-video-editor",
+		originSystemID: "http://cmdb.ft.com/systems/next-video-editor",
 		notifierApp:    cmsNotifier,
 		scope:          scopeContent,
 	},
@@ -61,13 +61,13 @@ var defaultCollections = map[string]targetSystem{
 	},
 	"v1-metadata": {
 		name:           "v1-metadata",
-		originSystemID: "methode-web-pub",
+		originSystemID: "http://cmdb.ft.com/systems/methode-web-pub",
 		notifierApp:    cmsMetadataNotifier,
 		scope:          scopeMetadata,
 	},
 	"next-video-editor": {
 		name:           "video-metadata",
-		originSystemID: "next-video-editor",
+		originSystemID: "http://cmdb.ft.com/systems/next-video-editor",
 		notifierApp:    cmsMetadataNotifier,
 		scope:          scopeMetadata,
 	},
