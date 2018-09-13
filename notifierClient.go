@@ -12,6 +12,12 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
+const (
+	contentTypeHeader     string = "Content-Type"
+	xOriginSystemIDHeader string = "X-Origin-System-Id"
+	originSystemIDHeader  string = "Origin-System-Id"
+)
+
 type notifierClient interface {
 	Notify(nMsg *nativeMSG, notifierApp, uuid, tid string) error
 }
@@ -41,11 +47,8 @@ func (c *httpNotifier) Notify(nMsg *nativeMSG, notifierApp, uuid, tid string) er
 	}
 	req.Header.Add(transactionidutils.TransactionIDHeader, tid)
 	req.Header.Add("Authorization", c.authHeader)
-	req.Header.Add("Content-Type", nMsg.contentType)
-	if nMsg.originSystemID == "" {
-		nMsg.originSystemID = "-"
-	}
-	req.Header.Add("X-Origin-System-Id", nMsg.originSystemID)
+	req.Header.Add(contentTypeHeader, nMsg.contentType)
+	req.Header.Add(xOriginSystemIDHeader, nMsg.originSystemID)
 	req.Header.Set("Connection", "close")
 	resp, err := c.httpClient.Do(req)
 	if err != nil {

@@ -11,49 +11,49 @@ import (
 
 var testCollections = map[string]targetSystem{
 	"methode": {
-		name:           "methode",
-		originSystemID: "methode-web-pub",
-		notifierApp:    cmsNotifier,
-		scope:          scopeContent,
+		name: "methode",
+		defaultOriginSystemID: "methode-web-pub",
+		notifierApp:           cmsNotifier,
+		scope:                 scopeContent,
 	},
 	"wordpress": {
-		name:           "wordpress",
-		originSystemID: "wordpress",
-		notifierApp:    cmsNotifier,
-		scope:          scopeContent,
+		name: "wordpress",
+		defaultOriginSystemID: "wordpress",
+		notifierApp:           cmsNotifier,
+		scope:                 scopeContent,
 	},
 	"video": {
-		name:           "video",
-		originSystemID: "next-video-editor",
-		notifierApp:    cmsNotifier,
-		scope:          scopeContent,
+		name: "video",
+		defaultOriginSystemID: "next-video-editor",
+		notifierApp:           cmsNotifier,
+		scope:                 scopeContent,
 	},
 	"spark": {
-		name:           "spark",
-		originSystemID: "cct",
-		notifierApp:    cmsNotifier,
-		scope:          scopeContent,
+		name: "spark",
+		defaultOriginSystemID: "cct",
+		notifierApp:           cmsNotifier,
+		scope:                 scopeContent,
 	},
 	"pac-metadata": {
-		name:           "pac-metadata",
-		originSystemID: "http://cmdb.ft.com/systems/pac",
-		notifierApp:    cmsMetadataNotifier,
-		scope:          scopeMetadata,
+		name: "pac-metadata",
+		defaultOriginSystemID: "http://cmdb.ft.com/systems/pac",
+		notifierApp:           cmsMetadataNotifier,
+		scope:                 scopeMetadata,
 	},
 	"v1-metadata": {
-		name:           "v1-metadata",
-		originSystemID: "methode-web-pub",
-		notifierApp:    cmsMetadataNotifier,
-		scope:          scopeMetadata,
+		name: "v1-metadata",
+		defaultOriginSystemID: "methode-web-pub",
+		notifierApp:           cmsMetadataNotifier,
+		scope:                 scopeMetadata,
 	},
 }
 
 var testCollectionsSingle = map[string]targetSystem{
 	"methode": {
-		name:           "methode",
-		originSystemID: "methode-web-pub",
-		notifierApp:    cmsNotifier,
-		scope:          scopeContent,
+		name: "methode",
+		defaultOriginSystemID: "methode-web-pub",
+		notifierApp:           cmsNotifier,
+		scope:                 scopeContent,
 	},
 }
 

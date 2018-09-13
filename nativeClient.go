@@ -66,11 +66,11 @@ func (c *nativeStoreClient) GetNative(collection, uuid, tid string) (nMsg *nativ
 	if err != nil {
 		return nil, true, fmt.Errorf("failed to read response body for uuid=%v %v", uuid, err)
 	}
-	nMsg.contentType = resp.Header.Get("Content-Type")
+	nMsg.contentType = resp.Header.Get(contentTypeHeader)
 	if nMsg.contentType == "" {
 		nMsg.contentType = "application/json"
 	}
-	nMsg.originSystemID = resp.Header.Get("Origin-System-Id")
+	nMsg.originSystemID = resp.Header.Get(originSystemIDHeader)
 	return nMsg, true, nil
 }
 

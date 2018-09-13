@@ -22,54 +22,54 @@ const (
 )
 
 type targetSystem struct {
-	name           string
-	originSystemID string
-	notifierApp    string
-	scope          string
+	name                  string
+	defaultOriginSystemID string
+	notifierApp           string
+	scope                 string
 }
 
 var defaultCollections = map[string]targetSystem{
 	"methode": {
-		name:           "methode",
-		originSystemID: "http://cmdb.ft.com/systems/methode-web-pub",
-		notifierApp:    cmsNotifier,
-		scope:          scopeContent,
+		name: "methode",
+		defaultOriginSystemID: "http://cmdb.ft.com/systems/methode-web-pub",
+		notifierApp:           cmsNotifier,
+		scope:                 scopeContent,
 	},
 	"wordpress": {
-		name:           "wordpress",
-		originSystemID: "http://cmdb.ft.com/systems/wordpress",
-		notifierApp:    cmsNotifier,
-		scope:          scopeContent,
+		name: "wordpress",
+		defaultOriginSystemID: "http://cmdb.ft.com/systems/wordpress",
+		notifierApp:           cmsNotifier,
+		scope:                 scopeContent,
 	},
 	"spark": {
-		name:           "spark",
-		originSystemID: "http://cmdb.ft.com/systems/cct",
-		notifierApp:    cmsNotifier,
-		scope:          scopeContent,
+		name: "spark",
+		defaultOriginSystemID: "http://cmdb.ft.com/systems/cct",
+		notifierApp:           cmsNotifier,
+		scope:                 scopeContent,
 	},
 	"video": {
-		name:           "video",
-		originSystemID: "http://cmdb.ft.com/systems/next-video-editor",
-		notifierApp:    cmsNotifier,
-		scope:          scopeContent,
+		name: "video",
+		defaultOriginSystemID: "http://cmdb.ft.com/systems/next-video-editor",
+		notifierApp:           cmsNotifier,
+		scope:                 scopeContent,
 	},
 	"pac-metadata": {
-		name:           "pac-metadata",
-		originSystemID: "http://cmdb.ft.com/systems/pac",
-		notifierApp:    cmsMetadataNotifier,
-		scope:          scopeMetadata,
+		name: "pac-metadata",
+		defaultOriginSystemID: "http://cmdb.ft.com/systems/pac",
+		notifierApp:           cmsMetadataNotifier,
+		scope:                 scopeMetadata,
 	},
 	"v1-metadata": {
-		name:           "v1-metadata",
-		originSystemID: "http://cmdb.ft.com/systems/methode-web-pub",
-		notifierApp:    cmsMetadataNotifier,
-		scope:          scopeMetadata,
+		name: "v1-metadata",
+		defaultOriginSystemID: "http://cmdb.ft.com/systems/methode-web-pub",
+		notifierApp:           cmsMetadataNotifier,
+		scope:                 scopeMetadata,
 	},
 	"next-video-editor": {
-		name:           "video-metadata",
-		originSystemID: "http://cmdb.ft.com/systems/next-video-editor",
-		notifierApp:    cmsMetadataNotifier,
-		scope:          scopeMetadata,
+		name: "video-metadata",
+		defaultOriginSystemID: "http://cmdb.ft.com/systems/next-video-editor",
+		notifierApp:           cmsMetadataNotifier,
+		scope:                 scopeMetadata,
 	},
 }
 

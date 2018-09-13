@@ -60,12 +60,12 @@ func (r *notifyingUCRepublisher) RepublishUUIDFromCollection(uuid, tid string, c
 	}
 	nativeContent.body = deleteNativeIngesterAttr(nativeContent.body)
 	if nativeContent.originSystemID == "" {
-		nativeContent.originSystemID = collection.originSystemID
+		nativeContent.originSystemID = collection.defaultOriginSystemID
 	}
 	err = r.notifierClient.Notify(nativeContent, collection.notifierApp, uuid, tid)
 	if err != nil {
 		extendTimeToLength(start, r.rateLimit)
-		return nil, true, fmt.Errorf("couldn't send to notifier uuid=%v tid=%v collection=%v originSystemId=%v size=%vB notifierApp=%v %v", uuid, tid, collection.name, collection.originSystemID, len(nativeContent.body), collection.notifierApp, err)
+		return nil, true, fmt.Errorf("couldn't send to notifier uuid=%v tid=%v collection=%v originSystemId=%v size=%vB notifierApp=%v %v", uuid, tid, collection.name, collection.defaultOriginSystemID, len(nativeContent.body), collection.notifierApp, err)
 	}
 
 	extendTimeToLength(start, r.rateLimit)
