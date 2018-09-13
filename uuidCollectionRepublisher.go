@@ -69,7 +69,7 @@ func (r *notifyingUCRepublisher) RepublishUUIDFromCollection(uuid, tid string, c
 	}
 
 	extendTimeToLength(start, r.rateLimit)
-	return &okMsg{uuid, tid, collection.name, collection.originSystemID, len(nativeContent.body), collection.notifierApp, nativeContent.contentType}, true, nil
+	return &okMsg{uuid, tid, collection.name, nativeContent.originSystemID, len(nativeContent.body), collection.notifierApp, nativeContent.contentType}, true, nil
 }
 
 func extendTimeToLength(start time.Time, length time.Duration) {
