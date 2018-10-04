@@ -187,7 +187,7 @@ func main() {
 }
 
 func regSplit(text string) []string {
-	reg := regexp.MustCompile("\\s")
+	reg := regexp.MustCompile(`\s`)
 	indexes := reg.FindAllStringIndex(strings.TrimSpace(text), -1)
 	laststart := 0
 	result := make([]string, len(indexes)+1)

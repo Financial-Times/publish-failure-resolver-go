@@ -1,7 +1,6 @@
 package main
 
 import (
-	"encoding/json"
 	"fmt"
 	"time"
 )
@@ -34,21 +33,6 @@ func (msg *okMsg) String() string {
 	return fmt.Sprintf("sent for publish uuid=%v tid=%v collection=%v originSystemId=%v size=%vB notifierApp=%v contentType=%v", msg.uuid, msg.tid, msg.collectionName, msg.collectionOriginSystemID, msg.sizeBytes, msg.notifierAppName, msg.contentType)
 }
 
-func deleteNativeIngesterAttr(nativeContent []byte) []byte {
-	var content map[string]interface{}
-	var nativeContentParsed []byte
-	errParsed := json.Unmarshal(nativeContent, &content)
-	if errParsed == nil {
-		delete(content, "lastModified")
-		delete(content, "publishReference")
-		nativeContentParsed, errParsed = json.Marshal(content)
-	}
-	if errParsed == nil {
-		return nativeContentParsed
-	}
-	return nativeContent
-}
-
 func (r *notifyingUCRepublisher) RepublishUUIDFromCollection(uuid, tid string, collection targetSystem) (msg *okMsg, wasFound bool, err error) {
 	start := time.Now()
 	nativeContent, isFound, err := r.nativeStoreClient.GetNative(collection.name, uuid, tid)
@@ -58,7 +42,6 @@ func (r *notifyingUCRepublisher) RepublishUUIDFromCollection(uuid, tid string, c
 	if !isFound {
 		return nil, false, nil
 	}
-	nativeContent.body = deleteNativeIngesterAttr(nativeContent.body)
 	if nativeContent.originSystemID == "" {
 		nativeContent.originSystemID = collection.defaultOriginSystemID
 	}
