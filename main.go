@@ -41,8 +41,8 @@ var defaultCollections = map[string]targetSystem{
 		notifierApp:           cmsNotifier,
 		scope:                 scopeContent,
 	},
-	"spark": {
-		name: "spark",
+	"universal-content": {
+		name: "universal-content",
 		defaultOriginSystemID: "http://cmdb.ft.com/systems/cct",
 		notifierApp:           cmsNotifier,
 		scope:                 scopeContent,
