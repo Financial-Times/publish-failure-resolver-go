@@ -11,8 +11,14 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
+type nativeMSG struct {
+	body           []byte
+	contentType    string
+	originSystemID string
+}
+
 type nativeStoreClientInterface interface {
-	GetNative(collection, uuid, tid string) (nativeContent []byte, found bool, err error)
+	GetNative(collection, uuid, tid string) (nativeContent *nativeMSG, found bool, err error)
 }
 
 type nativeStoreClient struct {
@@ -29,7 +35,7 @@ func newNativeStoreClient(httpClient *http.Client, nativeAddress, authHeader str
 	}
 }
 
-func (c *nativeStoreClient) GetNative(collection, uuid, tid string) (nativeContent []byte, found bool, err error) {
+func (c *nativeStoreClient) GetNative(collection, uuid, tid string) (nMsg *nativeMSG, found bool, err error) {
 	nativeURL, err := url.Parse(c.nativeAddress + collection + "/" + uuid)
 	if err != nil {
 		return nil, false, fmt.Errorf("invalid address nativeUrl=%v", nativeURL)
@@ -43,7 +49,7 @@ func (c *nativeStoreClient) GetNative(collection, uuid, tid string) (nativeConte
 	req.Header.Set("Connection", "close")
 	resp, err := c.httpClient.Do(req)
 	if err != nil {
-		return nil, false, fmt.Errorf("unsucessful request for fetching native content uuid=%v %v", uuid, err)
+		return nil, false, fmt.Errorf("unsuccessful request for fetching native content uuid=%v %v", uuid, err)
 	}
 	defer niceClose(resp)
 	if resp.StatusCode == http.StatusNotFound {
@@ -54,11 +60,18 @@ func (c *nativeStoreClient) GetNative(collection, uuid, tid string) (nativeConte
 		io.Copy(ioutil.Discard, resp.Body)
 		return nil, false, fmt.Errorf("unexpected status while fetching native content uuid=%v collection=%v status=%v", uuid, collection, resp.StatusCode)
 	}
-	bodyAsBytes, err := ioutil.ReadAll(resp.Body)
+
+	nMsg = new(nativeMSG)
+	nMsg.body, err = ioutil.ReadAll(resp.Body)
 	if err != nil {
 		return nil, true, fmt.Errorf("failed to read response body for uuid=%v %v", uuid, err)
 	}
-	return bodyAsBytes, true, nil
+	nMsg.contentType = resp.Header.Get(contentTypeHeader)
+	if nMsg.contentType == "" {
+		nMsg.contentType = "application/json"
+	}
+	nMsg.originSystemID = resp.Header.Get(originSystemIDHeader)
+	return nMsg, true, nil
 }
 
 func niceClose(resp *http.Response) {

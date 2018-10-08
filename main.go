@@ -22,54 +22,54 @@ const (
 )
 
 type targetSystem struct {
-	name           string
-	originSystemID string
-	notifierApp    string
-	scope          string
+	name                  string
+	defaultOriginSystemID string
+	notifierApp           string
+	scope                 string
 }
 
 var defaultCollections = map[string]targetSystem{
 	"methode": {
-		name:           "methode",
-		originSystemID: "methode-web-pub",
-		notifierApp:    cmsNotifier,
-		scope:          scopeContent,
+		name: "methode",
+		defaultOriginSystemID: "http://cmdb.ft.com/systems/methode-web-pub",
+		notifierApp:           cmsNotifier,
+		scope:                 scopeContent,
 	},
 	"wordpress": {
-		name:           "wordpress",
-		originSystemID: "wordpress",
-		notifierApp:    cmsNotifier,
-		scope:          scopeContent,
+		name: "wordpress",
+		defaultOriginSystemID: "http://cmdb.ft.com/systems/wordpress",
+		notifierApp:           cmsNotifier,
+		scope:                 scopeContent,
 	},
-	"spark": {
-		name:           "spark",
-		originSystemID: "cct",
-		notifierApp:    cmsNotifier,
-		scope:          scopeContent,
+	"universal-content": {
+		name: "universal-content",
+		defaultOriginSystemID: "http://cmdb.ft.com/systems/cct",
+		notifierApp:           cmsNotifier,
+		scope:                 scopeContent,
 	},
 	"video": {
-		name:           "video",
-		originSystemID: "next-video-editor",
-		notifierApp:    cmsNotifier,
-		scope:          scopeContent,
+		name: "video",
+		defaultOriginSystemID: "http://cmdb.ft.com/systems/next-video-editor",
+		notifierApp:           cmsNotifier,
+		scope:                 scopeContent,
 	},
 	"pac-metadata": {
-		name:           "pac-metadata",
-		originSystemID: "http://cmdb.ft.com/systems/pac",
-		notifierApp:    cmsMetadataNotifier,
-		scope:          scopeMetadata,
+		name: "pac-metadata",
+		defaultOriginSystemID: "http://cmdb.ft.com/systems/pac",
+		notifierApp:           cmsMetadataNotifier,
+		scope:                 scopeMetadata,
 	},
 	"v1-metadata": {
-		name:           "v1-metadata",
-		originSystemID: "methode-web-pub",
-		notifierApp:    cmsMetadataNotifier,
-		scope:          scopeMetadata,
+		name: "v1-metadata",
+		defaultOriginSystemID: "http://cmdb.ft.com/systems/methode-web-pub",
+		notifierApp:           cmsMetadataNotifier,
+		scope:                 scopeMetadata,
 	},
 	"next-video-editor": {
-		name:           "video-metadata",
-		originSystemID: "next-video-editor",
-		notifierApp:    cmsMetadataNotifier,
-		scope:          scopeMetadata,
+		name: "video-metadata",
+		defaultOriginSystemID: "http://cmdb.ft.com/systems/next-video-editor",
+		notifierApp:           cmsMetadataNotifier,
+		scope:                 scopeMetadata,
 	},
 }
 
@@ -169,7 +169,7 @@ func main() {
 			log.Fatalf("Couldn't create notifier client. %v", err)
 		}
 
-		uuids := regSplit(*uuidList, "\\s")
+		uuids := regSplit(*uuidList)
 		log.Infof("uuidList=%v", uuids)
 		_, errs := republisher.Republish(uuids, *republishScope, *transactionIDPrefix)
 
@@ -186,8 +186,8 @@ func main() {
 	}
 }
 
-func regSplit(text string, delimeter string) []string {
-	reg := regexp.MustCompile(delimeter)
+func regSplit(text string) []string {
+	reg := regexp.MustCompile(`\s`)
 	indexes := reg.FindAllStringIndex(strings.TrimSpace(text), -1)
 	laststart := 0
 	result := make([]string, len(indexes)+1)

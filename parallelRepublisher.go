@@ -14,7 +14,6 @@ type bulkRepublisher interface {
 type notifyingParallelRepublisher struct {
 	uuidRepublisher uuidRepublisher
 	balancer        workbalancer.WorkBalancer
-	parallelism     int
 }
 
 func newNotifyingParallelRepublisher(uuidRepublisher uuidRepublisher, parallelism int) bulkRepublisher {

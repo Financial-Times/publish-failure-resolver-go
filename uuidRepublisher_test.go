@@ -11,49 +11,49 @@ import (
 
 var testCollections = map[string]targetSystem{
 	"methode": {
-		name:           "methode",
-		originSystemID: "methode-web-pub",
-		notifierApp:    cmsNotifier,
-		scope:          scopeContent,
+		name: "methode",
+		defaultOriginSystemID: "methode-web-pub",
+		notifierApp:           cmsNotifier,
+		scope:                 scopeContent,
 	},
 	"wordpress": {
-		name:           "wordpress",
-		originSystemID: "wordpress",
-		notifierApp:    cmsNotifier,
-		scope:          scopeContent,
+		name: "wordpress",
+		defaultOriginSystemID: "wordpress",
+		notifierApp:           cmsNotifier,
+		scope:                 scopeContent,
 	},
 	"video": {
-		name:           "video",
-		originSystemID: "next-video-editor",
-		notifierApp:    cmsNotifier,
-		scope:          scopeContent,
+		name: "video",
+		defaultOriginSystemID: "next-video-editor",
+		notifierApp:           cmsNotifier,
+		scope:                 scopeContent,
 	},
-	"spark": {
-		name:           "spark",
-		originSystemID: "cct",
-		notifierApp:    cmsNotifier,
-		scope:          scopeContent,
+	"universal-content": {
+		name: "universal-content",
+		defaultOriginSystemID: "cct",
+		notifierApp:           cmsNotifier,
+		scope:                 scopeContent,
 	},
 	"pac-metadata": {
-		name:           "pac-metadata",
-		originSystemID: "http://cmdb.ft.com/systems/pac",
-		notifierApp:    cmsMetadataNotifier,
-		scope:          scopeMetadata,
+		name: "pac-metadata",
+		defaultOriginSystemID: "http://cmdb.ft.com/systems/pac",
+		notifierApp:           cmsMetadataNotifier,
+		scope:                 scopeMetadata,
 	},
 	"v1-metadata": {
-		name:           "v1-metadata",
-		originSystemID: "methode-web-pub",
-		notifierApp:    cmsMetadataNotifier,
-		scope:          scopeMetadata,
+		name: "v1-metadata",
+		defaultOriginSystemID: "methode-web-pub",
+		notifierApp:           cmsMetadataNotifier,
+		scope:                 scopeMetadata,
 	},
 }
 
 var testCollectionsSingle = map[string]targetSystem{
 	"methode": {
-		name:           "methode",
-		originSystemID: "methode-web-pub",
-		notifierApp:    cmsNotifier,
-		scope:          scopeContent,
+		name: "methode",
+		defaultOriginSystemID: "methode-web-pub",
+		notifierApp:           cmsNotifier,
+		scope:                 scopeContent,
 	},
 }
 
@@ -88,20 +88,21 @@ func TestOkAndSoftErrors_Ok(t *testing.T) {
 		notifierAppName:          "cmsMetadataNotifie",
 	}
 
-	expectedMsgs:=[]*okMsg{&msg, &msg1,&msg2}
+	expectedMsgs := []*okMsg{&msg, &msg1, &msg2}
 	var nilMsg *okMsg
 	mockedUCRepublisher.On("RepublishUUIDFromCollection", "b3ec9282-1073-46ad-9d44-144dad7fe956", mock.MatchedBy(func(tid string) bool { return strings.HasPrefix(tid, "prefix1") }), testCollections["methode"]).Return(&msg, true, nil)
 	mockedUCRepublisher.On("RepublishUUIDFromCollection", "b3ec9282-1073-46ad-9d44-144dad7fe956", mock.MatchedBy(func(tid string) bool { return strings.HasPrefix(tid, "prefix1") }), testCollections["v1-metadata"]).Return(&msg1, true, nil)
 	mockedUCRepublisher.On("RepublishUUIDFromCollection", "b3ec9282-1073-46ad-9d44-144dad7fe956", mock.MatchedBy(func(tid string) bool { return strings.HasPrefix(tid, "prefix1") }), testCollections["pac-metadata"]).Return(&msg2, true, nil)
 	mockedUCRepublisher.On("RepublishUUIDFromCollection", "b3ec9282-1073-46ad-9d44-144dad7fe956", mock.MatchedBy(func(tid string) bool { return strings.HasPrefix(tid, "prefix1") }), testCollections["wordpress"]).Return(nilMsg, false, nil)
-	mockedUCRepublisher.On("RepublishUUIDFromCollection", "b3ec9282-1073-46ad-9d44-144dad7fe956", mock.MatchedBy(func(tid string) bool { return strings.HasPrefix(tid, "prefix1") }), testCollections["spark"]).Return(nilMsg, false, nil)
+	mockedUCRepublisher.On("RepublishUUIDFromCollection", "b3ec9282-1073-46ad-9d44-144dad7fe956", mock.MatchedBy(func(tid string) bool { return strings.HasPrefix(tid, "prefix1") }), testCollections["universal-content"]).Return(nilMsg, false, nil)
+	mockedUCRepublisher.On("RepublishUUIDFromCollection", "b3ec9282-1073-46ad-9d44-144dad7fe956", mock.MatchedBy(func(tid string) bool { return strings.HasPrefix(tid, "prefix1") }), testCollections["universal-content"]).Return(nilMsg, false, nil)
 	mockedUCRepublisher.On("RepublishUUIDFromCollection", "b3ec9282-1073-46ad-9d44-144dad7fe956", mock.MatchedBy(func(tid string) bool { return strings.HasPrefix(tid, "prefix1") }), testCollections["video"]).Return(nilMsg, false, fmt.Errorf("test error let's say 401"))
 
 	msgs, errs := republisher.Republish("b3ec9282-1073-46ad-9d44-144dad7fe956", "prefix1", "both")
 
 	assert.Equal(t, 3, len(msgs))
 	assert.Equal(t, 1, len(errs))
-	assert.ElementsMatch(t,msgs, expectedMsgs)
+	assert.ElementsMatch(t, msgs, expectedMsgs)
 	assert.Equal(t, fmt.Errorf("error publishing test error let's say 401"), errs[0])
 }
 
