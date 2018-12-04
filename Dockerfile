@@ -25,7 +25,8 @@ RUN BUILDINFO_PACKAGE="${ORG_PATH}/${PROJECT}/vendor/${ORG_PATH}/service-status-
 
 
 # Multi-stage build - copy only the certs and the binary into the image
-FROM scratch
+# Using alpine, as scratch doesn't work for running in Jenkins, as it needs the cat command
+FROM alpine
 WORKDIR /
 COPY --from=0 /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
 COPY --from=0 /artifacts/* /
