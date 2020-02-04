@@ -1,4 +1,4 @@
-package main
+package api
 
 import (
 	"bytes"
@@ -18,8 +18,8 @@ const (
 	originSystemIDHeader  string = "Origin-System-Id"
 )
 
-type notifierClient interface {
-	Notify(nMsg *nativeMSG, notifierApp, uuid, tid string) error
+type NotifierClient interface {
+	Notify(nMsg *NativeMSG, notifierApp, uuid, tid string) error
 }
 
 type httpNotifier struct {
@@ -28,7 +28,7 @@ type httpNotifier struct {
 	authHeader          string
 }
 
-func newHTTPNotifier(httpClient *http.Client, notifierAddress, authHeader string) (*httpNotifier, error) {
+func NewHTTPNotifier(httpClient *http.Client, notifierAddress, authHeader string) (*httpNotifier, error) {
 	return &httpNotifier{
 		httpClient:          httpClient,
 		notifierAddressBase: notifierAddress,
@@ -36,19 +36,19 @@ func newHTTPNotifier(httpClient *http.Client, notifierAddress, authHeader string
 	}, nil
 }
 
-func (c *httpNotifier) Notify(nMsg *nativeMSG, notifierApp, uuid, tid string) error {
+func (c *httpNotifier) Notify(nMsg *NativeMSG, notifierApp, uuid, tid string) error {
 	notifierURL, err := url.Parse(c.notifierAddressBase + notifierApp + "/notify")
 	if err != nil {
 		return fmt.Errorf("coulnd't create URL for notifierAddressBase=%v notifierApp=%v", c.notifierAddressBase, notifierApp)
 	}
-	req, err := http.NewRequest(http.MethodPost, notifierURL.String(), bytes.NewReader(nMsg.body))
+	req, err := http.NewRequest(http.MethodPost, notifierURL.String(), bytes.NewReader(nMsg.Body))
 	if err != nil {
 		return fmt.Errorf("couldn't create request to notify for uuid=%v %v", uuid, err)
 	}
 	req.Header.Add(transactionidutils.TransactionIDHeader, tid)
 	req.Header.Add("Authorization", c.authHeader)
-	req.Header.Add(contentTypeHeader, nMsg.contentType)
-	req.Header.Add(xOriginSystemIDHeader, nMsg.originSystemID)
+	req.Header.Add(contentTypeHeader, nMsg.ContentType)
+	req.Header.Add(xOriginSystemIDHeader, nMsg.OriginSystemID)
 	req.Header.Set("Connection", "close")
 	resp, err := c.httpClient.Do(req)
 	if err != nil {
@@ -59,7 +59,7 @@ func (c *httpNotifier) Notify(nMsg *nativeMSG, notifierApp, uuid, tid string) er
 		if err != nil {
 			log.Warnf("Couldn't read response body %v", err)
 		}
-		return fmt.Errorf("unexpected status while notifying for uuid=%v content-type=%s Oringin-System-Id=%s status=%v %v", uuid, nMsg.contentType, nMsg.originSystemID,
+		return fmt.Errorf("unexpected status while notifying for uuid=%v content-type=%s Oringin-System-Id=%s status=%v %v", uuid, nMsg.ContentType, nMsg.OriginSystemID,
 			resp.StatusCode, string(bodyAsBytes))
 	}
 	io.Copy(ioutil.Discard, resp.Body)

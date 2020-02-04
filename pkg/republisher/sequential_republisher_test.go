@@ -1,4 +1,4 @@
-package main
+package republisher
 
 import (
 	"fmt"
@@ -18,11 +18,10 @@ func TestSequentialRepublishSingle_Ok(t *testing.T) {
 		sizeBytes:                1024,
 		notifierAppName:          "cms-notifier",
 	}
-	mockedUUIDRepublisher.On("Republish", "19cf2763-90b1-40db-90e7-e813425ebe81", "prefix1", scopeBoth).Return([]*okMsg{&msg}, []error{})
+	mockedUUIDRepublisher.On("Republish", "19cf2763-90b1-40db-90e7-e813425ebe81", "prefix1", ScopeBoth).Return([]*okMsg{&msg}, []error{})
 
-	pRepublisher := newNotifyingSequentialRepublisher(mockedUUIDRepublisher)
-
-	pRepublisher.Republish([]string{"19cf2763-90b1-40db-90e7-e813425ebe81"}, scopeBoth, "prefix1")
+	r := NewNotifyingSequentialRepublisher(mockedUUIDRepublisher)
+	r.Republish([]string{"19cf2763-90b1-40db-90e7-e813425ebe81"}, ScopeBoth, "prefix1")
 
 	mock.AssertExpectationsForObjects(t, mockedUUIDRepublisher)
 }
@@ -56,11 +55,10 @@ func TestRepublishMultiple_Ok(t *testing.T) {
 	}
 	err1 := fmt.Errorf("test some error publishing 1")
 	err2 := fmt.Errorf("test some error publishing 2")
-	mockedUUIDRepublisher.On("Republish", "19cf2763-90b1-40db-90e7-e813425ebe81", "prefix1", scopeBoth).Times(nOk).Return([]*okMsg{&msg1, &msg2}, []error{})
-	mockedUUIDRepublisher.On("Republish", "70357268-04f7-4149-bb17-217d3eb56d49", "prefix1", scopeBoth).Times(nErr).Return([]*okMsg{}, []error{err1, err2})
-	pRepublisher := newNotifyingSequentialRepublisher(mockedUUIDRepublisher)
-
-	actualMsgs, actualErrs := pRepublisher.Republish(uuids, scopeBoth, "prefix1")
+	mockedUUIDRepublisher.On("Republish", "19cf2763-90b1-40db-90e7-e813425ebe81", "prefix1", ScopeBoth).Times(nOk).Return([]*okMsg{&msg1, &msg2}, []error{})
+	mockedUUIDRepublisher.On("Republish", "70357268-04f7-4149-bb17-217d3eb56d49", "prefix1", ScopeBoth).Times(nErr).Return([]*okMsg{}, []error{err1, err2})
+	r := NewNotifyingSequentialRepublisher(mockedUUIDRepublisher)
+	actualMsgs, actualErrs := r.Republish(uuids, ScopeBoth, "prefix1")
 
 	mock.AssertExpectationsForObjects(t, mockedUUIDRepublisher)
 	assert.Equal(t, 2*nOk, len(actualMsgs))

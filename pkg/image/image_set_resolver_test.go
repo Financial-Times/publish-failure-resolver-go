@@ -1,4 +1,4 @@
-package main
+package image
 
 import (
 	"testing"
@@ -7,7 +7,7 @@ import (
 )
 
 func TestUuidImageSetResolver(t *testing.T) {
-	r := newUUIDImageSetResolver()
+	r := NewUUIDImageSetResolver()
 
 	imageSetUUID := "9f365884-0c25-11e8-24ad-bec2279df517"
 

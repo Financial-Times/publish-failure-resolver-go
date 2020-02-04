@@ -1,4 +1,4 @@
-package main
+package republisher
 
 import (
 	"fmt"
@@ -9,58 +9,58 @@ import (
 	"github.com/stretchr/testify/mock"
 )
 
-var testCollections = map[string]targetSystem{
+var testCollections = Collections{
 	"methode": {
-		name: "methode",
+		name:                  "methode",
 		defaultOriginSystemID: "methode-web-pub",
-		notifierApp:           cmsNotifier,
-		scope:                 scopeContent,
+		notifierApp:           CmsNotifier,
+		scope:                 ScopeContent,
 	},
 	"wordpress": {
-		name: "wordpress",
+		name:                  "wordpress",
 		defaultOriginSystemID: "wordpress",
-		notifierApp:           cmsNotifier,
-		scope:                 scopeContent,
+		notifierApp:           CmsNotifier,
+		scope:                 ScopeContent,
 	},
 	"video": {
-		name: "video",
+		name:                  "video",
 		defaultOriginSystemID: "next-video-editor",
-		notifierApp:           cmsNotifier,
-		scope:                 scopeContent,
+		notifierApp:           CmsNotifier,
+		scope:                 ScopeContent,
 	},
 	"universal-content": {
-		name: "universal-content",
+		name:                  "universal-content",
 		defaultOriginSystemID: "cct",
-		notifierApp:           cmsNotifier,
-		scope:                 scopeContent,
+		notifierApp:           CmsNotifier,
+		scope:                 ScopeContent,
 	},
 	"pac-metadata": {
-		name: "pac-metadata",
+		name:                  "pac-metadata",
 		defaultOriginSystemID: "http://cmdb.ft.com/systems/pac",
-		notifierApp:           cmsMetadataNotifier,
-		scope:                 scopeMetadata,
+		notifierApp:           CmsMetadataNotifier,
+		scope:                 ScopeMetadata,
 	},
 	"v1-metadata": {
-		name: "v1-metadata",
+		name:                  "v1-metadata",
 		defaultOriginSystemID: "methode-web-pub",
-		notifierApp:           cmsMetadataNotifier,
-		scope:                 scopeMetadata,
+		notifierApp:           CmsMetadataNotifier,
+		scope:                 ScopeMetadata,
 	},
 }
 
-var testCollectionsSingle = map[string]targetSystem{
+var testCollectionsSingle = Collections{
 	"methode": {
-		name: "methode",
+		name:                  "methode",
 		defaultOriginSystemID: "methode-web-pub",
-		notifierApp:           cmsNotifier,
-		scope:                 scopeContent,
+		notifierApp:           CmsNotifier,
+		scope:                 ScopeContent,
 	},
 }
 
 func TestOkAndSoftErrors_Ok(t *testing.T) {
 	mockedDocStoreClient := new(mockDocStoreClient)
 	mockedUCRepublisher := new(mockUCRepublisher)
-	republisher := newNotifyingUUIDRepublisher(mockedUCRepublisher, mockedDocStoreClient, testCollections)
+	republisher := NewNotifyingUUIDRepublisher(mockedUCRepublisher, mockedDocStoreClient, testCollections)
 	msg := okMsg{
 		uuid:                     "b3ec9282-1073-46ad-9d44-144dad7fe956",
 		tid:                      "prefix1",
@@ -109,7 +109,7 @@ func TestOkAndSoftErrors_Ok(t *testing.T) {
 func TestNotScoped_Ok(t *testing.T) {
 	mockedDocStoreClient := new(mockDocStoreClient)
 	mockedUCRepublisher := new(mockUCRepublisher)
-	republisher := newNotifyingUUIDRepublisher(mockedUCRepublisher, mockedDocStoreClient, testCollectionsSingle)
+	r := NewNotifyingUUIDRepublisher(mockedUCRepublisher, mockedDocStoreClient, testCollectionsSingle)
 	msg := okMsg{
 		uuid:                     "b3ec9282-1073-46ad-9d44-144dad7fe956",
 		tid:                      "prefix1",
@@ -120,7 +120,7 @@ func TestNotScoped_Ok(t *testing.T) {
 	}
 	mockedUCRepublisher.On("RepublishUUIDFromCollection", "b3ec9282-1073-46ad-9d44-144dad7fe956", mock.MatchedBy(func(tid string) bool { return strings.HasPrefix(tid, "prefix1") }), testCollections["methode"]).Return(&msg, true, nil)
 
-	msgs, errs := republisher.Republish("b3ec9282-1073-46ad-9d44-144dad7fe956", "prefix1", "metadata")
+	msgs, errs := r.Republish("b3ec9282-1073-46ad-9d44-144dad7fe956", "prefix1", "metadata")
 
 	assert.Equal(t, 0, len(msgs))
 	assert.Equal(t, 0, len(errs))
@@ -141,9 +141,9 @@ func TestFoundInNoneFoundInDocStore_Ok(t *testing.T) {
 	mockedUCRepublisher.On("RepublishUUIDFromCollection", "64bc4319-cd22-43e9-8b12-358622d7a5ba", mock.MatchedBy(func(tid string) bool { return strings.HasPrefix(tid, "prefix1") }), testCollections["methode"]).Return(&msg, true, nil)
 	mockedDocStoreClient := new(mockDocStoreClient)
 	mockedDocStoreClient.On("GetImageSetsModelUUID", "b3ec9282-1073-46ad-9d44-144dad7fe956", mock.MatchedBy(func(tid string) bool { return strings.HasPrefix(tid, "prefix1") })).Return(true, "64bc4319-cd22-43e9-8b12-358622d7a5ba", nil)
-	republisher := newNotifyingUUIDRepublisher(mockedUCRepublisher, mockedDocStoreClient, testCollectionsSingle)
+	r := NewNotifyingUUIDRepublisher(mockedUCRepublisher, mockedDocStoreClient, testCollectionsSingle)
 
-	msgs, errs := republisher.Republish("b3ec9282-1073-46ad-9d44-144dad7fe956", "prefix1", "both")
+	msgs, errs := r.Republish("b3ec9282-1073-46ad-9d44-144dad7fe956", "prefix1", "both")
 
 	assert.Equal(t, 1, len(msgs))
 	assert.Equal(t, 0, len(errs))
@@ -165,9 +165,9 @@ func TestFoundInNoneErrInDocStore_Err(t *testing.T) {
 	mockedUCRepublisher.On("RepublishUUIDFromCollection", "64bc4319-cd22-43e9-8b12-358622d7a5ba", mock.MatchedBy(func(tid string) bool { return strings.HasPrefix(tid, "prefix1") }), testCollections["methode"]).Return(&msg, true, nil)
 	mockedDocStoreClient := new(mockDocStoreClient)
 	mockedDocStoreClient.On("GetImageSetsModelUUID", "b3ec9282-1073-46ad-9d44-144dad7fe956", mock.MatchedBy(func(tid string) bool { return strings.HasPrefix(tid, "prefix1") })).Return(false, "", fmt.Errorf("error in dsapi, maybe 401"))
-	republisher := newNotifyingUUIDRepublisher(mockedUCRepublisher, mockedDocStoreClient, testCollectionsSingle)
+	r := NewNotifyingUUIDRepublisher(mockedUCRepublisher, mockedDocStoreClient, testCollectionsSingle)
 
-	msgs, errs := republisher.Republish("b3ec9282-1073-46ad-9d44-144dad7fe956", "prefix1", "both")
+	msgs, errs := r.Republish("b3ec9282-1073-46ad-9d44-144dad7fe956", "prefix1", "both")
 
 	assert.Equal(t, 0, len(msgs))
 	assert.Equal(t, 1, len(errs))
@@ -189,9 +189,9 @@ func TestFoundInNoneAndNotFoundInDocStore_Ok(t *testing.T) {
 	mockedUCRepublisher.On("RepublishUUIDFromCollection", "64bc4319-cd22-43e9-8b12-358622d7a5ba", mock.MatchedBy(func(tid string) bool { return strings.HasPrefix(tid, "prefix1") }), testCollections["methode"]).Return(&msg, true, nil)
 	mockedDocStoreClient := new(mockDocStoreClient)
 	mockedDocStoreClient.On("GetImageSetsModelUUID", "b3ec9282-1073-46ad-9d44-144dad7fe956", mock.MatchedBy(func(tid string) bool { return strings.HasPrefix(tid, "prefix1") })).Return(false, "", nil)
-	republisher := newNotifyingUUIDRepublisher(mockedUCRepublisher, mockedDocStoreClient, testCollectionsSingle)
+	r := NewNotifyingUUIDRepublisher(mockedUCRepublisher, mockedDocStoreClient, testCollectionsSingle)
 
-	msgs, errs := republisher.Republish("b3ec9282-1073-46ad-9d44-144dad7fe956", "prefix1", "both")
+	msgs, errs := r.Republish("b3ec9282-1073-46ad-9d44-144dad7fe956", "prefix1", "both")
 
 	assert.Equal(t, 0, len(msgs))
 	assert.Equal(t, 1, len(errs))
@@ -211,7 +211,7 @@ type mockUCRepublisher struct {
 	mock.Mock
 }
 
-func (m *mockUCRepublisher) RepublishUUIDFromCollection(uuid, tid string, collection targetSystem) (msg *okMsg, wasFound bool, err error) {
+func (m *mockUCRepublisher) RepublishUUIDFromCollection(uuid, tid string, collection CollectionMetadata) (msg *okMsg, wasFound bool, err error) {
 	args := m.Called(uuid, tid, collection)
 	return args.Get(0).(*okMsg), args.Bool(1), args.Error(2)
 }

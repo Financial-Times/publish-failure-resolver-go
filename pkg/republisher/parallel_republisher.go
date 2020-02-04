@@ -1,4 +1,4 @@
-package main
+package republisher
 
 import (
 	"sync"
@@ -7,16 +7,16 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-type bulkRepublisher interface {
+type BulkRepublisher interface {
 	Republish(uuids []string, publishScope string, tidPrefix string) ([]*okMsg, []error)
 }
 
 type notifyingParallelRepublisher struct {
-	uuidRepublisher uuidRepublisher
+	uuidRepublisher UUIDRepublisher
 	balancer        workbalancer.WorkBalancer
 }
 
-func newNotifyingParallelRepublisher(uuidRepublisher uuidRepublisher, parallelism int) bulkRepublisher {
+func NewNotifyingParallelRepublisher(uuidRepublisher UUIDRepublisher, parallelism int) BulkRepublisher {
 	return &notifyingParallelRepublisher{
 		uuidRepublisher: uuidRepublisher,
 		balancer:        workbalancer.NewChannelBalancer(parallelism),
@@ -65,7 +65,7 @@ type publishWork struct {
 	uuid            string
 	publishScope    string
 	tidPrefix       string
-	uuidRepublisher uuidRepublisher
+	uuidRepublisher UUIDRepublisher
 }
 
 type publishResult struct {

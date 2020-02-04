@@ -1,8 +1,9 @@
-package main
+package api
 
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/Financial-Times/publish-failure-resolver-go/pkg/image"
 	"io"
 	"io/ioutil"
 	"net/http"
@@ -12,13 +13,22 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
+type DocStoreContent struct {
+	Members []Member `json:"members"`
+	Type    string   `json:"type"`
+}
+
+type Member struct {
+	UUID string `json:"uuid"`
+}
+
 type httpDocStore struct {
 	httpClient          *http.Client
 	docStoreAddressBase string
 	authHeader          string
 }
 
-func newHTTPDocStore(httpClient *http.Client, docStoreAddressBase, authHeader string) (imageSetUUIDResolver, error) {
+func NewHTTPDocStore(httpClient *http.Client, docStoreAddressBase, authHeader string) (image.ImageSetUUIDResolver, error) {
 	return &httpDocStore{
 		httpClient:          httpClient,
 		docStoreAddressBase: docStoreAddressBase,

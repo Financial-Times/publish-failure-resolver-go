@@ -1,14 +1,14 @@
-package main
+package republisher
 
 import (
 	log "github.com/sirupsen/logrus"
 )
 
 type notifyingSequentialRepublisher struct {
-	uuidRepublisher uuidRepublisher
+	uuidRepublisher UUIDRepublisher
 }
 
-func newNotifyingSequentialRepublisher(uuidRepublisher uuidRepublisher) bulkRepublisher {
+func NewNotifyingSequentialRepublisher(uuidRepublisher UUIDRepublisher) BulkRepublisher {
 	return &notifyingSequentialRepublisher{
 		uuidRepublisher: uuidRepublisher,
 	}

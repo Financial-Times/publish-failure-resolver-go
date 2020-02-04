@@ -1,23 +1,24 @@
-package main
+package republisher
 
 import (
 	"fmt"
+	"github.com/Financial-Times/publish-failure-resolver-go/pkg/image"
 
 	"github.com/Financial-Times/transactionid-utils-go"
 	log "github.com/sirupsen/logrus"
 )
 
-type uuidRepublisher interface {
+type UUIDRepublisher interface {
 	Republish(uuid, tidPrefix string, republishScope string) (msgs []*okMsg, errs []error)
 }
 
 type notifyingUUIDRepublisher struct {
-	ucRepublisher    uuidCollectionRepublisher
-	imageSetResolver imageSetUUIDResolver
-	collections      map[string]targetSystem
+	ucRepublisher    UUIDCollectionRepublisher
+	imageSetResolver image.ImageSetUUIDResolver
+	collections      Collections
 }
 
-func newNotifyingUUIDRepublisher(uuidCollectionRepublisher uuidCollectionRepublisher, imageSetResolver imageSetUUIDResolver, collections map[string]targetSystem) *notifyingUUIDRepublisher {
+func NewNotifyingUUIDRepublisher(uuidCollectionRepublisher UUIDCollectionRepublisher, imageSetResolver image.ImageSetUUIDResolver, collections Collections) *notifyingUUIDRepublisher {
 	return &notifyingUUIDRepublisher{
 		ucRepublisher:    uuidCollectionRepublisher,
 		imageSetResolver: imageSetResolver,
@@ -30,7 +31,7 @@ func (r *notifyingUUIDRepublisher) Republish(uuid, tidPrefix string, republishSc
 	isScopedInAnyCollection := false
 
 	for _, collection := range r.collections {
-		if republishScope != scopeBoth && republishScope != collection.scope {
+		if republishScope != ScopeBoth && republishScope != collection.scope {
 			continue
 		}
 		tid := tidPrefix + transactionidutils.NewTransactionID()

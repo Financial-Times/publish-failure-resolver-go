@@ -1,7 +1,8 @@
-package main
+package republisher
 
 import (
 	"fmt"
+	"github.com/Financial-Times/publish-failure-resolver-go/pkg/http/api"
 	"testing"
 	"time"
 
@@ -9,15 +10,15 @@ import (
 	"github.com/stretchr/testify/mock"
 )
 
-var nm = &nativeMSG{
-	body:           []byte("native"),
-	contentType:    "application/json",
-	originSystemID: "methode-web-pub",
+var nm = &api.NativeMSG{
+	Body:           []byte("native"),
+	ContentType:    "application/json",
+	OriginSystemID: "methode-web-pub",
 }
-var nmEmpty = &nativeMSG{
-	body:           []byte(""),
-	contentType:    "application/json",
-	originSystemID: "methode-web-pub",
+var nmEmpty = &api.NativeMSG{
+	Body:           []byte(""),
+	ContentType:    "application/json",
+	OriginSystemID: "methode-web-pub",
 }
 
 func TestRepublishOk_Ok(t *testing.T) {
@@ -26,9 +27,9 @@ func TestRepublishOk_Ok(t *testing.T) {
 	mockedNativeStoreClient.On("GetNative", "methode", "f3b3b579-732b-4323-affa-a316aacad213", "tid_123").Return(nm, true, nil)
 	mockedNotifierClient := new(mockNotifierClient)
 	mockedNotifierClient.On("Notify", nm, "cms-notifier", "f3b3b579-732b-4323-affa-a316aacad213", "tid_123").Return(nil)
-	republisher := newNotifyingUCRepublisher(mockedNotifierClient, mockedNativeStoreClient, 500*time.Millisecond)
-	collection := targetSystem{
-		name: "methode",
+	republisher := NewNotifyingUCRepublisher(mockedNotifierClient, mockedNativeStoreClient, 500*time.Millisecond)
+	collection := CollectionMetadata{
+		name:                  "methode",
 		defaultOriginSystemID: "methode-web-pub",
 		notifierApp:           "cms-notifier",
 		scope:                 "content",
@@ -55,9 +56,9 @@ func TestRepublishNotFound_NotFound(t *testing.T) {
 	mockedNativeStoreClient := new(mockNativeStoreClient)
 	mockedNativeStoreClient.On("GetNative", "methode", "f3b3b579-732b-4323-affa-a316aacad213", "tid_123").Return(nmEmpty, false, nil)
 	mockedNotifierClient := new(mockNotifierClient)
-	republisher := newNotifyingUCRepublisher(mockedNotifierClient, mockedNativeStoreClient, 1*time.Millisecond)
-	collection := targetSystem{
-		name: "methode",
+	republisher := NewNotifyingUCRepublisher(mockedNotifierClient, mockedNativeStoreClient, 1*time.Millisecond)
+	collection := CollectionMetadata{
+		name:                  "methode",
 		defaultOriginSystemID: "methode-web-pub",
 		notifierApp:           "cms-notifier",
 		scope:                 "content",
@@ -74,9 +75,9 @@ func TestRepublishErrNative_Err(t *testing.T) {
 	mockedNativeStoreClient := new(mockNativeStoreClient)
 	mockedNativeStoreClient.On("GetNative", "methode", "f3b3b579-732b-4323-affa-a316aacad213", "tid_123").Return(nm, false, fmt.Errorf("Error 401 on native client"))
 	mockedNotifierClient := new(mockNotifierClient)
-	republisher := newNotifyingUCRepublisher(mockedNotifierClient, mockedNativeStoreClient, time.Second)
-	collection := targetSystem{
-		name: "methode",
+	republisher := NewNotifyingUCRepublisher(mockedNotifierClient, mockedNativeStoreClient, time.Second)
+	collection := CollectionMetadata{
+		name:                  "methode",
 		defaultOriginSystemID: "methode-web-pub",
 		notifierApp:           "cms-notifier",
 		scope:                 "content",
@@ -98,15 +99,15 @@ func TestRepublishErrNotifier_Err(t *testing.T) {
 	mockedNativeStoreClient.On("GetNative", "methode", "f3b3b579-732b-4323-affa-a316aacad213", "tid_123").Return(nm, true, nil)
 	mockedNotifierClient := new(mockNotifierClient)
 	mockedNotifierClient.On("Notify", nm, "cms-notifier", "f3b3b579-732b-4323-affa-a316aacad213", "tid_123").Return(fmt.Errorf("error on notifier maybe 404"))
-	republisher := newNotifyingUCRepublisher(mockedNotifierClient, mockedNativeStoreClient, 500*time.Millisecond)
-	collection := targetSystem{
-		name: "methode",
+	r := NewNotifyingUCRepublisher(mockedNotifierClient, mockedNativeStoreClient, 500*time.Millisecond)
+	collection := CollectionMetadata{
+		name:                  "methode",
 		defaultOriginSystemID: "methode-web-pub",
 		notifierApp:           "cms-notifier",
 		scope:                 "content",
 	}
 
-	msg, wasFound, err := republisher.RepublishUUIDFromCollection("f3b3b579-732b-4323-affa-a316aacad213", "tid_123", collection)
+	msg, wasFound, err := r.RepublishUUIDFromCollection("f3b3b579-732b-4323-affa-a316aacad213", "tid_123", collection)
 
 	assert.Error(t, fmt.Errorf("error on notifier maybe 404"), err)
 	assert.True(t, wasFound)
@@ -118,16 +119,16 @@ type mockNativeStoreClient struct {
 	mock.Mock
 }
 
-func (m *mockNativeStoreClient) GetNative(collection, uuid, tid string) (nMsg *nativeMSG, found bool, err error) {
+func (m *mockNativeStoreClient) GetNative(collection, uuid, tid string) (nMsg *api.NativeMSG, found bool, err error) {
 	args := m.Called(collection, uuid, tid)
-	return args.Get(0).(*nativeMSG), args.Bool(1), args.Error(2)
+	return args.Get(0).(*api.NativeMSG), args.Bool(1), args.Error(2)
 }
 
 type mockNotifierClient struct {
 	mock.Mock
 }
 
-func (m *mockNotifierClient) Notify(nMSG *nativeMSG, notifierApp, uuid, tid string) error {
+func (m *mockNotifierClient) Notify(nMSG *api.NativeMSG, notifierApp, uuid, tid string) error {
 	args := m.Called(nMSG, notifierApp, uuid, tid)
 	return args.Error(0)
 }

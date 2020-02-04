@@ -2,8 +2,10 @@ package main
 
 import (
 	"encoding/base64"
-	"net"
-	"net/http"
+	"github.com/Financial-Times/publish-failure-resolver-go/pkg/http"
+	"github.com/Financial-Times/publish-failure-resolver-go/pkg/http/api"
+	"github.com/Financial-Times/publish-failure-resolver-go/pkg/image"
+	"github.com/Financial-Times/publish-failure-resolver-go/pkg/republisher"
 	"os"
 	"regexp"
 	"strings"
@@ -12,66 +14,6 @@ import (
 	"github.com/jawher/mow.cli"
 	log "github.com/sirupsen/logrus"
 )
-
-const (
-	scopeBoth           = "both"
-	scopeContent        = "content"
-	scopeMetadata       = "metadata"
-	cmsNotifier         = "cms-notifier"
-	cmsMetadataNotifier = "cms-metadata-notifier"
-)
-
-type targetSystem struct {
-	name                  string
-	defaultOriginSystemID string
-	notifierApp           string
-	scope                 string
-}
-
-var defaultCollections = map[string]targetSystem{
-	"methode": {
-		name: "methode",
-		defaultOriginSystemID: "http://cmdb.ft.com/systems/methode-web-pub",
-		notifierApp:           cmsNotifier,
-		scope:                 scopeContent,
-	},
-	"wordpress": {
-		name: "wordpress",
-		defaultOriginSystemID: "http://cmdb.ft.com/systems/wordpress",
-		notifierApp:           cmsNotifier,
-		scope:                 scopeContent,
-	},
-	"universal-content": {
-		name: "universal-content",
-		defaultOriginSystemID: "http://cmdb.ft.com/systems/cct",
-		notifierApp:           cmsNotifier,
-		scope:                 scopeContent,
-	},
-	"video": {
-		name: "video",
-		defaultOriginSystemID: "http://cmdb.ft.com/systems/next-video-editor",
-		notifierApp:           cmsNotifier,
-		scope:                 scopeContent,
-	},
-	"pac-metadata": {
-		name: "pac-metadata",
-		defaultOriginSystemID: "http://cmdb.ft.com/systems/pac",
-		notifierApp:           cmsMetadataNotifier,
-		scope:                 scopeMetadata,
-	},
-	"v1-metadata": {
-		name: "v1-metadata",
-		defaultOriginSystemID: "http://cmdb.ft.com/systems/methode-web-pub",
-		notifierApp:           cmsMetadataNotifier,
-		scope:                 scopeMetadata,
-	},
-	"next-video-editor": {
-		name: "video-metadata",
-		defaultOriginSystemID: "http://cmdb.ft.com/systems/next-video-editor",
-		notifierApp:           cmsMetadataNotifier,
-		scope:                 scopeMetadata,
-	},
-}
 
 func main() {
 	app := cli.App("publish-failure-resolver-go", "Republish, reimport or move content in UPP.")
@@ -146,23 +88,23 @@ func main() {
 		log.Infof("rateLimitMs=%v", *rateLimitMs)
 		log.Infof("parallelism=%v", *parallelism)
 
-		httpClient := setupHTTPClient()
-		nativeStoreClient := newNativeStoreClient(httpClient, "https://"+*sourceEnvHost+"/__nativerw/", "Basic "+base64.StdEncoding.EncodeToString([]byte(*sourceAuth)))
-		notifierClient, err := newHTTPNotifier(httpClient, "https://"+*targetEnvHost+"/__", "Basic "+base64.StdEncoding.EncodeToString([]byte(*targetAuth)))
-		var imageSetResolver imageSetUUIDResolver
+		httpClient := http.NewHTTPClient()
+		nativeStoreClient := api.NewNativeStoreClient(httpClient, "https://"+*sourceEnvHost+"/__nativerw/", "Basic "+base64.StdEncoding.EncodeToString([]byte(*sourceAuth)))
+		notifierClient, err := api.NewHTTPNotifier(httpClient, "https://"+*targetEnvHost+"/__", "Basic "+base64.StdEncoding.EncodeToString([]byte(*targetAuth)))
+		var imageSetResolver image.ImageSetUUIDResolver
 		if *deliveryEnvHost == "" || *deliveryAuth == "" {
-			imageSetResolver = newUUIDImageSetResolver()
+			imageSetResolver = image.NewUUIDImageSetResolver()
 		} else {
-			imageSetResolver, err = newHTTPDocStore(httpClient, "https://"+*deliveryEnvHost+"/__document-store-api/content", "Basic "+base64.StdEncoding.EncodeToString([]byte(*deliveryAuth)))
+			imageSetResolver, err = api.NewHTTPDocStore(httpClient, "https://"+*deliveryEnvHost+"/__document-store-api/content", "Basic "+base64.StdEncoding.EncodeToString([]byte(*deliveryAuth)))
 		}
 		rateLimit := time.Duration(*rateLimitMs) * time.Millisecond
-		uuidCollectionRepublisher := newNotifyingUCRepublisher(notifierClient, nativeStoreClient, rateLimit)
-		uuidRepublisher := newNotifyingUUIDRepublisher(uuidCollectionRepublisher, imageSetResolver, defaultCollections)
-		var republisher bulkRepublisher
+		uuidCollectionRepublisher := republisher.NewNotifyingUCRepublisher(notifierClient, nativeStoreClient, rateLimit)
+		uuidRepublisher := republisher.NewNotifyingUUIDRepublisher(uuidCollectionRepublisher, imageSetResolver, republisher.DefaultCollections)
+		var r republisher.BulkRepublisher
 		if *parallelism > 1 {
-			republisher = newNotifyingParallelRepublisher(uuidRepublisher, *parallelism)
+			r = republisher.NewNotifyingParallelRepublisher(uuidRepublisher, *parallelism)
 		} else {
-			republisher = newNotifyingSequentialRepublisher(uuidRepublisher)
+			r = republisher.NewNotifyingSequentialRepublisher(uuidRepublisher)
 		}
 
 		if err != nil {
@@ -171,7 +113,7 @@ func main() {
 
 		uuids := regSplit(*uuidList)
 		log.Infof("uuidList=%v", uuids)
-		_, errs := republisher.Republish(uuids, *republishScope, *transactionIDPrefix)
+		_, errs := r.Republish(uuids, *republishScope, *transactionIDPrefix)
 
 		log.Infof("Dealt with nUuids=%v in duration=%v", len(uuids), time.Duration(time.Now().UnixNano()-start.UnixNano())*time.Nanosecond)
 
@@ -197,22 +139,4 @@ func regSplit(text string) []string {
 	}
 	result[len(indexes)] = text[laststart:]
 	return result
-}
-
-func setupHTTPClient() *http.Client {
-	return &http.Client{
-		Transport: &http.Transport{
-			Proxy: http.ProxyFromEnvironment,
-			DialContext: (&net.Dialer{
-				Timeout:   30 * time.Second,
-				KeepAlive: 30 * time.Second,
-			}).DialContext,
-			MaxIdleConnsPerHost:   20,
-			TLSHandshakeTimeout:   3 * time.Second,
-			ExpectContinueTimeout: 1 * time.Second,
-		},
-		CheckRedirect: func(req *http.Request, via []*http.Request) error {
-			return http.ErrUseLastResponse
-		},
-	}
 }
