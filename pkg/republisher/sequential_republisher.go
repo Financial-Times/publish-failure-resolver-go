@@ -14,8 +14,8 @@ func NewNotifyingSequentialRepublisher(uuidRepublisher UUIDRepublisher) BulkRepu
 	}
 }
 
-func (r *notifyingSequentialRepublisher) Republish(uuids []string, publishScope string, tidPrefix string) ([]*okMsg, []error) {
-	var msgs []*okMsg
+func (r *notifyingSequentialRepublisher) Republish(uuids []string, publishScope string, tidPrefix string) ([]*OKMsg, []error) {
+	var msgs []*OKMsg
 	var errs []error
 
 	for _, uuid := range uuids {

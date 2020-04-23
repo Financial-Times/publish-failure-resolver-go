@@ -10,7 +10,7 @@ import (
 
 func TestSequentialRepublishSingle_Ok(t *testing.T) {
 	mockedUUIDRepublisher := new(mockUUIDRepublisher)
-	msg := okMsg{
+	msg := OKMsg{
 		uuid:                     "19cf2763-90b1-40db-90e7-e813425ebe81",
 		tid:                      "prefix1",
 		collectionName:           "collection1",
@@ -18,7 +18,7 @@ func TestSequentialRepublishSingle_Ok(t *testing.T) {
 		sizeBytes:                1024,
 		notifierAppName:          "cms-notifier",
 	}
-	mockedUUIDRepublisher.On("Republish", "19cf2763-90b1-40db-90e7-e813425ebe81", "prefix1", ScopeBoth).Return([]*okMsg{&msg}, []error{})
+	mockedUUIDRepublisher.On("Republish", "19cf2763-90b1-40db-90e7-e813425ebe81", "prefix1", ScopeBoth).Return([]*OKMsg{&msg}, []error{})
 
 	r := NewNotifyingSequentialRepublisher(mockedUUIDRepublisher)
 	r.Republish([]string{"19cf2763-90b1-40db-90e7-e813425ebe81"}, ScopeBoth, "prefix1")
@@ -37,7 +37,7 @@ func TestRepublishMultiple_Ok(t *testing.T) {
 	for i := 0; i < nErr; i++ {
 		uuids = append(uuids, "70357268-04f7-4149-bb17-217d3eb56d49")
 	}
-	msg1 := okMsg{
+	msg1 := OKMsg{
 		uuid:                     "19cf2763-90b1-40db-90e7-e813425ebe81",
 		tid:                      "prefix1tid_123",
 		collectionName:           "collection1",
@@ -45,7 +45,7 @@ func TestRepublishMultiple_Ok(t *testing.T) {
 		sizeBytes:                1024,
 		notifierAppName:          "cms-notifier",
 	}
-	msg2 := okMsg{
+	msg2 := OKMsg{
 		uuid:                     "19cf2763-90b1-40db-90e7-e813425ebe81",
 		tid:                      "prefix1tid_456",
 		collectionName:           "collection2",
@@ -55,8 +55,8 @@ func TestRepublishMultiple_Ok(t *testing.T) {
 	}
 	err1 := fmt.Errorf("test some error publishing 1")
 	err2 := fmt.Errorf("test some error publishing 2")
-	mockedUUIDRepublisher.On("Republish", "19cf2763-90b1-40db-90e7-e813425ebe81", "prefix1", ScopeBoth).Times(nOk).Return([]*okMsg{&msg1, &msg2}, []error{})
-	mockedUUIDRepublisher.On("Republish", "70357268-04f7-4149-bb17-217d3eb56d49", "prefix1", ScopeBoth).Times(nErr).Return([]*okMsg{}, []error{err1, err2})
+	mockedUUIDRepublisher.On("Republish", "19cf2763-90b1-40db-90e7-e813425ebe81", "prefix1", ScopeBoth).Times(nOk).Return([]*OKMsg{&msg1, &msg2}, []error{})
+	mockedUUIDRepublisher.On("Republish", "70357268-04f7-4149-bb17-217d3eb56d49", "prefix1", ScopeBoth).Times(nErr).Return([]*OKMsg{}, []error{err1, err2})
 	r := NewNotifyingSequentialRepublisher(mockedUUIDRepublisher)
 	actualMsgs, actualErrs := r.Republish(uuids, ScopeBoth, "prefix1")
 

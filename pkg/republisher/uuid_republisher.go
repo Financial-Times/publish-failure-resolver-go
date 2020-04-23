@@ -2,31 +2,33 @@ package republisher
 
 import (
 	"fmt"
-	"github.com/Financial-Times/publish-failure-resolver-go/pkg/image"
 
-	"github.com/Financial-Times/transactionid-utils-go"
 	log "github.com/sirupsen/logrus"
+
+	transactionidutils "github.com/Financial-Times/transactionid-utils-go"
+
+	"github.com/Financial-Times/publish-failure-resolver-go/pkg/image"
 )
 
 type UUIDRepublisher interface {
-	Republish(uuid, tidPrefix string, republishScope string) (msgs []*okMsg, errs []error)
+	Republish(uuid, tidPrefix string, republishScope string) (msgs []*OKMsg, errs []error)
 }
 
-type notifyingUUIDRepublisher struct {
+type NotifyingUUIDRepublisher struct {
 	ucRepublisher    UUIDCollectionRepublisher
-	imageSetResolver image.ImageSetUUIDResolver
+	imageSetResolver image.SetUUIDResolver
 	collections      Collections
 }
 
-func NewNotifyingUUIDRepublisher(uuidCollectionRepublisher UUIDCollectionRepublisher, imageSetResolver image.ImageSetUUIDResolver, collections Collections) *notifyingUUIDRepublisher {
-	return &notifyingUUIDRepublisher{
+func NewNotifyingUUIDRepublisher(uuidCollectionRepublisher UUIDCollectionRepublisher, imageSetResolver image.SetUUIDResolver, collections Collections) *NotifyingUUIDRepublisher {
+	return &NotifyingUUIDRepublisher{
 		ucRepublisher:    uuidCollectionRepublisher,
 		imageSetResolver: imageSetResolver,
 		collections:      collections,
 	}
 }
 
-func (r *notifyingUUIDRepublisher) Republish(uuid, tidPrefix string, republishScope string) (msgs []*okMsg, errs []error) {
+func (r *NotifyingUUIDRepublisher) Republish(uuid, tidPrefix string, republishScope string) (msgs []*OKMsg, errs []error) {
 	isFoundInAnyCollection := false
 	isScopedInAnyCollection := false
 

@@ -4,14 +4,14 @@ import (
 	"github.com/Financial-Times/uuid-utils-go"
 )
 
-type ImageSetUUIDResolver interface {
+type SetUUIDResolver interface {
 	GetImageSetsModelUUID(setUUID, tid string) (found bool, modelUUID string, err error)
 }
 
 type uuidImageSetResolver struct {
 }
 
-func NewUUIDImageSetResolver() ImageSetUUIDResolver {
+func NewUUIDImageSetResolver() SetUUIDResolver {
 	return &uuidImageSetResolver{}
 }
 

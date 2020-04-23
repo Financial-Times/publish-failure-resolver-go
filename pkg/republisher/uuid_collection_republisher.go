@@ -2,25 +2,26 @@ package republisher
 
 import (
 	"fmt"
-	"github.com/Financial-Times/publish-failure-resolver-go/pkg/http/api"
 	"time"
+
+	"github.com/Financial-Times/publish-failure-resolver-go/pkg/http/api"
 )
 
 type UUIDCollectionRepublisher interface {
-	RepublishUUIDFromCollection(uuid, tid string, collection CollectionMetadata) (msg *okMsg, wasFound bool, err error)
+	RepublishUUIDFromCollection(uuid, tid string, collection CollectionMetadata) (msg *OKMsg, wasFound bool, err error)
 }
 
-type notifyingUCRepublisher struct {
+type NotifyingUCRepublisher struct {
 	notifierClient    api.NotifierClient
 	nativeStoreClient api.NativeStoreClientInterface
 	rateLimit         time.Duration
 }
 
-func NewNotifyingUCRepublisher(notifierClient api.NotifierClient, nativeStoreClient api.NativeStoreClientInterface, rateLimit time.Duration) *notifyingUCRepublisher {
-	return &notifyingUCRepublisher{notifierClient, nativeStoreClient, rateLimit}
+func NewNotifyingUCRepublisher(notifierClient api.NotifierClient, nativeStoreClient api.NativeStoreClientInterface, rateLimit time.Duration) *NotifyingUCRepublisher {
+	return &NotifyingUCRepublisher{notifierClient, nativeStoreClient, rateLimit}
 }
 
-type okMsg struct {
+type OKMsg struct {
 	uuid                     string
 	tid                      string
 	collectionName           string
@@ -30,11 +31,11 @@ type okMsg struct {
 	contentType              string
 }
 
-func (msg *okMsg) String() string {
+func (msg *OKMsg) String() string {
 	return fmt.Sprintf("sent for publish uuid=%v tid=%v collection=%v originSystemId=%v size=%vB notifierApp=%v contentType=%v", msg.uuid, msg.tid, msg.collectionName, msg.collectionOriginSystemID, msg.sizeBytes, msg.notifierAppName, msg.contentType)
 }
 
-func (r *notifyingUCRepublisher) RepublishUUIDFromCollection(uuid, tid string, collection CollectionMetadata) (msg *okMsg, wasFound bool, err error) {
+func (r *NotifyingUCRepublisher) RepublishUUIDFromCollection(uuid, tid string, collection CollectionMetadata) (msg *OKMsg, wasFound bool, err error) {
 	start := time.Now()
 	nativeContent, isFound, err := r.nativeStoreClient.GetNative(collection.name, uuid, tid)
 	if err != nil {
@@ -53,7 +54,7 @@ func (r *notifyingUCRepublisher) RepublishUUIDFromCollection(uuid, tid string, c
 	}
 
 	extendTimeToLength(start, r.rateLimit)
-	return &okMsg{
+	return &OKMsg{
 		uuid:                     uuid,
 		tid:                      tid,
 		collectionName:           collection.name,

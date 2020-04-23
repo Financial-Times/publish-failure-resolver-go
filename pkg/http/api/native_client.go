@@ -21,21 +21,21 @@ type NativeStoreClientInterface interface {
 	GetNative(collection, uuid, tid string) (nativeContent *NativeMSG, found bool, err error)
 }
 
-type nativeStoreClient struct {
+type NativeStoreClient struct {
 	httpClient    *http.Client
 	nativeAddress string
 	authHeader    string
 }
 
-func NewNativeStoreClient(httpClient *http.Client, nativeAddress, authHeader string) *nativeStoreClient {
-	return &nativeStoreClient{
+func NewNativeStoreClient(httpClient *http.Client, nativeAddress, authHeader string) *NativeStoreClient {
+	return &NativeStoreClient{
 		httpClient:    httpClient,
 		nativeAddress: nativeAddress,
 		authHeader:    authHeader,
 	}
 }
 
-func (c *nativeStoreClient) GetNative(collection, uuid, tid string) (nMsg *NativeMSG, found bool, err error) {
+func (c *NativeStoreClient) GetNative(collection, uuid, tid string) (nMsg *NativeMSG, found bool, err error) {
 	nativeURL, err := url.Parse(c.nativeAddress + collection + "/" + uuid)
 	if err != nil {
 		return nil, false, fmt.Errorf("invalid address nativeUrl=%v", nativeURL)

@@ -8,7 +8,7 @@ import (
 )
 
 type BulkRepublisher interface {
-	Republish(uuids []string, publishScope string, tidPrefix string) ([]*okMsg, []error)
+	Republish(uuids []string, publishScope string, tidPrefix string) ([]*OKMsg, []error)
 }
 
 type notifyingParallelRepublisher struct {
@@ -23,8 +23,8 @@ func NewNotifyingParallelRepublisher(uuidRepublisher UUIDRepublisher, parallelis
 	}
 }
 
-func (r *notifyingParallelRepublisher) Republish(uuids []string, publishScope string, tidPrefix string) ([]*okMsg, []error) {
-	var msgs []*okMsg
+func (r *notifyingParallelRepublisher) Republish(uuids []string, publishScope string, tidPrefix string) ([]*OKMsg, []error) {
+	var msgs []*OKMsg
 	var errs []error
 	allResultsFetched := sync.WaitGroup{}
 	allResultsFetched.Add(1)
@@ -69,7 +69,7 @@ type publishWork struct {
 }
 
 type publishResult struct {
-	msgs []*okMsg
+	msgs []*OKMsg
 	errs []error
 }
 

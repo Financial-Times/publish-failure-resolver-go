@@ -2,12 +2,13 @@ package republisher
 
 import (
 	"fmt"
-	"github.com/Financial-Times/publish-failure-resolver-go/pkg/http/api"
 	"testing"
 	"time"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
+
+	"github.com/Financial-Times/publish-failure-resolver-go/pkg/http/api"
 )
 
 var nm = &api.NativeMSG{
@@ -37,7 +38,7 @@ func TestRepublishOk_Ok(t *testing.T) {
 
 	msg, wasFound, err := republisher.RepublishUUIDFromCollection("f3b3b579-732b-4323-affa-a316aacad213", "tid_123", collection)
 
-	expectedMsg := okMsg{
+	expectedMsg := OKMsg{
 		uuid:                     "f3b3b579-732b-4323-affa-a316aacad213",
 		tid:                      "tid_123",
 		collectionName:           "methode",

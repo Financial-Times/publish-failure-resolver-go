@@ -3,14 +3,16 @@ package api
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/Financial-Times/publish-failure-resolver-go/pkg/image"
 	"io"
 	"io/ioutil"
 	"net/http"
 	"net/url"
 
-	"github.com/Financial-Times/transactionid-utils-go"
 	log "github.com/sirupsen/logrus"
+
+	transactionidutils "github.com/Financial-Times/transactionid-utils-go"
+
+	"github.com/Financial-Times/publish-failure-resolver-go/pkg/image"
 )
 
 type DocStoreContent struct {
@@ -28,7 +30,7 @@ type httpDocStore struct {
 	authHeader          string
 }
 
-func NewHTTPDocStore(httpClient *http.Client, docStoreAddressBase, authHeader string) (image.ImageSetUUIDResolver, error) {
+func NewHTTPDocStore(httpClient *http.Client, docStoreAddressBase, authHeader string) (image.SetUUIDResolver, error) {
 	return &httpDocStore{
 		httpClient:          httpClient,
 		docStoreAddressBase: docStoreAddressBase,
@@ -75,7 +77,7 @@ func (c *httpDocStore) GetImageSetsModelUUID(setUUID, tid string) (bool, string,
 func (c *httpDocStore) obtainImageModelUUID(bodyAsBytes []byte, setUUID, tid string) (found bool, modelUUID string, err error) {
 	var content DocStoreContent
 	jerr := json.Unmarshal(bodyAsBytes, &content)
-	if err != nil {
+	if jerr != nil {
 		return false, "", fmt.Errorf("failed to unmarshal response body for uuid=%v tid=%v: %v", setUUID, tid, jerr.Error())
 	}
 	if content.Type != "ImageSet" {

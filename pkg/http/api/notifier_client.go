@@ -22,21 +22,21 @@ type NotifierClient interface {
 	Notify(nMsg *NativeMSG, notifierApp, uuid, tid string) error
 }
 
-type httpNotifier struct {
+type HTTPNotifier struct {
 	httpClient          *http.Client
 	notifierAddressBase string
 	authHeader          string
 }
 
-func NewHTTPNotifier(httpClient *http.Client, notifierAddress, authHeader string) (*httpNotifier, error) {
-	return &httpNotifier{
+func NewHTTPNotifier(httpClient *http.Client, notifierAddress, authHeader string) (*HTTPNotifier, error) {
+	return &HTTPNotifier{
 		httpClient:          httpClient,
 		notifierAddressBase: notifierAddress,
 		authHeader:          authHeader,
 	}, nil
 }
 
-func (c *httpNotifier) Notify(nMsg *NativeMSG, notifierApp, uuid, tid string) error {
+func (c *HTTPNotifier) Notify(nMsg *NativeMSG, notifierApp, uuid, tid string) error {
 	notifierURL, err := url.Parse(c.notifierAddressBase + notifierApp + "/notify")
 	if err != nil {
 		return fmt.Errorf("coulnd't create URL for notifierAddressBase=%v notifierApp=%v", c.notifierAddressBase, notifierApp)

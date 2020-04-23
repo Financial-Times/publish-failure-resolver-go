@@ -2,10 +2,6 @@ package main
 
 import (
 	"encoding/base64"
-	"github.com/Financial-Times/publish-failure-resolver-go/pkg/http"
-	"github.com/Financial-Times/publish-failure-resolver-go/pkg/http/api"
-	"github.com/Financial-Times/publish-failure-resolver-go/pkg/image"
-	"github.com/Financial-Times/publish-failure-resolver-go/pkg/republisher"
 	"os"
 	"regexp"
 	"strings"
@@ -13,6 +9,11 @@ import (
 
 	"github.com/jawher/mow.cli"
 	log "github.com/sirupsen/logrus"
+
+	"github.com/Financial-Times/publish-failure-resolver-go/pkg/http"
+	"github.com/Financial-Times/publish-failure-resolver-go/pkg/http/api"
+	"github.com/Financial-Times/publish-failure-resolver-go/pkg/image"
+	"github.com/Financial-Times/publish-failure-resolver-go/pkg/republisher"
 )
 
 func main() {
@@ -91,7 +92,7 @@ func main() {
 		httpClient := http.NewHTTPClient()
 		nativeStoreClient := api.NewNativeStoreClient(httpClient, "https://"+*sourceEnvHost+"/__nativerw/", "Basic "+base64.StdEncoding.EncodeToString([]byte(*sourceAuth)))
 		notifierClient, err := api.NewHTTPNotifier(httpClient, "https://"+*targetEnvHost+"/__", "Basic "+base64.StdEncoding.EncodeToString([]byte(*targetAuth)))
-		var imageSetResolver image.ImageSetUUIDResolver
+		var imageSetResolver image.SetUUIDResolver
 		if *deliveryEnvHost == "" || *deliveryAuth == "" {
 			imageSetResolver = image.NewUUIDImageSetResolver()
 		} else {

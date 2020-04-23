@@ -61,7 +61,7 @@ func TestOkAndSoftErrors_Ok(t *testing.T) {
 	mockedDocStoreClient := new(mockDocStoreClient)
 	mockedUCRepublisher := new(mockUCRepublisher)
 	republisher := NewNotifyingUUIDRepublisher(mockedUCRepublisher, mockedDocStoreClient, testCollections)
-	msg := okMsg{
+	msg := OKMsg{
 		uuid:                     "b3ec9282-1073-46ad-9d44-144dad7fe956",
 		tid:                      "prefix1",
 		collectionName:           "methode",
@@ -70,7 +70,7 @@ func TestOkAndSoftErrors_Ok(t *testing.T) {
 		notifierAppName:          "cms-notifier",
 	}
 
-	msg1 := okMsg{
+	msg1 := OKMsg{
 		uuid:                     "b3ec9282-1073-46ad-9d44-144dad7fe956",
 		tid:                      "prefix1",
 		collectionName:           "v1-metadata",
@@ -79,7 +79,7 @@ func TestOkAndSoftErrors_Ok(t *testing.T) {
 		notifierAppName:          "cmsMetadataNotifie",
 	}
 
-	msg2 := okMsg{
+	msg2 := OKMsg{
 		uuid:                     "b3ec9282-1073-46ad-9d44-144dad7fe956",
 		tid:                      "prefix1",
 		collectionName:           "pac-metadata",
@@ -88,8 +88,8 @@ func TestOkAndSoftErrors_Ok(t *testing.T) {
 		notifierAppName:          "cmsMetadataNotifie",
 	}
 
-	expectedMsgs := []*okMsg{&msg, &msg1, &msg2}
-	var nilMsg *okMsg
+	expectedMsgs := []*OKMsg{&msg, &msg1, &msg2}
+	var nilMsg *OKMsg
 	mockedUCRepublisher.On("RepublishUUIDFromCollection", "b3ec9282-1073-46ad-9d44-144dad7fe956", mock.MatchedBy(func(tid string) bool { return strings.HasPrefix(tid, "prefix1") }), testCollections["methode"]).Return(&msg, true, nil)
 	mockedUCRepublisher.On("RepublishUUIDFromCollection", "b3ec9282-1073-46ad-9d44-144dad7fe956", mock.MatchedBy(func(tid string) bool { return strings.HasPrefix(tid, "prefix1") }), testCollections["v1-metadata"]).Return(&msg1, true, nil)
 	mockedUCRepublisher.On("RepublishUUIDFromCollection", "b3ec9282-1073-46ad-9d44-144dad7fe956", mock.MatchedBy(func(tid string) bool { return strings.HasPrefix(tid, "prefix1") }), testCollections["pac-metadata"]).Return(&msg2, true, nil)
@@ -110,7 +110,7 @@ func TestNotScoped_Ok(t *testing.T) {
 	mockedDocStoreClient := new(mockDocStoreClient)
 	mockedUCRepublisher := new(mockUCRepublisher)
 	r := NewNotifyingUUIDRepublisher(mockedUCRepublisher, mockedDocStoreClient, testCollectionsSingle)
-	msg := okMsg{
+	msg := OKMsg{
 		uuid:                     "b3ec9282-1073-46ad-9d44-144dad7fe956",
 		tid:                      "prefix1",
 		collectionName:           "methode",
@@ -128,7 +128,7 @@ func TestNotScoped_Ok(t *testing.T) {
 
 func TestFoundInNoneFoundInDocStore_Ok(t *testing.T) {
 	mockedUCRepublisher := new(mockUCRepublisher)
-	msg := okMsg{
+	msg := OKMsg{
 		uuid:                     "64bc4319-cd22-43e9-8b12-358622d7a5ba",
 		tid:                      "prefix1tid_123",
 		collectionName:           "methode",
@@ -136,7 +136,7 @@ func TestFoundInNoneFoundInDocStore_Ok(t *testing.T) {
 		sizeBytes:                1024,
 		notifierAppName:          "cms-notifier",
 	}
-	var nilMsg *okMsg
+	var nilMsg *OKMsg
 	mockedUCRepublisher.On("RepublishUUIDFromCollection", "b3ec9282-1073-46ad-9d44-144dad7fe956", mock.MatchedBy(func(tid string) bool { return strings.HasPrefix(tid, "prefix1") }), testCollections["methode"]).Return(nilMsg, false, nil)
 	mockedUCRepublisher.On("RepublishUUIDFromCollection", "64bc4319-cd22-43e9-8b12-358622d7a5ba", mock.MatchedBy(func(tid string) bool { return strings.HasPrefix(tid, "prefix1") }), testCollections["methode"]).Return(&msg, true, nil)
 	mockedDocStoreClient := new(mockDocStoreClient)
@@ -152,7 +152,7 @@ func TestFoundInNoneFoundInDocStore_Ok(t *testing.T) {
 
 func TestFoundInNoneErrInDocStore_Err(t *testing.T) {
 	mockedUCRepublisher := new(mockUCRepublisher)
-	msg := okMsg{
+	msg := OKMsg{
 		uuid:                     "64bc4319-cd22-43e9-8b12-358622d7a5ba",
 		tid:                      "prefix1tid_123",
 		collectionName:           "methode",
@@ -160,7 +160,7 @@ func TestFoundInNoneErrInDocStore_Err(t *testing.T) {
 		sizeBytes:                1024,
 		notifierAppName:          "cms-notifier",
 	}
-	var nilMsg *okMsg
+	var nilMsg *OKMsg
 	mockedUCRepublisher.On("RepublishUUIDFromCollection", "b3ec9282-1073-46ad-9d44-144dad7fe956", mock.MatchedBy(func(tid string) bool { return strings.HasPrefix(tid, "prefix1") }), testCollections["methode"]).Return(nilMsg, false, nil)
 	mockedUCRepublisher.On("RepublishUUIDFromCollection", "64bc4319-cd22-43e9-8b12-358622d7a5ba", mock.MatchedBy(func(tid string) bool { return strings.HasPrefix(tid, "prefix1") }), testCollections["methode"]).Return(&msg, true, nil)
 	mockedDocStoreClient := new(mockDocStoreClient)
@@ -176,7 +176,7 @@ func TestFoundInNoneErrInDocStore_Err(t *testing.T) {
 
 func TestFoundInNoneAndNotFoundInDocStore_Ok(t *testing.T) {
 	mockedUCRepublisher := new(mockUCRepublisher)
-	msg := okMsg{
+	msg := OKMsg{
 		uuid:                     "64bc4319-cd22-43e9-8b12-358622d7a5ba",
 		tid:                      "prefix1tid_123",
 		collectionName:           "methode",
@@ -184,7 +184,7 @@ func TestFoundInNoneAndNotFoundInDocStore_Ok(t *testing.T) {
 		sizeBytes:                1024,
 		notifierAppName:          "cms-notifier",
 	}
-	var nilMsg *okMsg
+	var nilMsg *OKMsg
 	mockedUCRepublisher.On("RepublishUUIDFromCollection", "b3ec9282-1073-46ad-9d44-144dad7fe956", mock.MatchedBy(func(tid string) bool { return strings.HasPrefix(tid, "prefix1") }), testCollections["methode"]).Return(nilMsg, false, nil)
 	mockedUCRepublisher.On("RepublishUUIDFromCollection", "64bc4319-cd22-43e9-8b12-358622d7a5ba", mock.MatchedBy(func(tid string) bool { return strings.HasPrefix(tid, "prefix1") }), testCollections["methode"]).Return(&msg, true, nil)
 	mockedDocStoreClient := new(mockDocStoreClient)
@@ -211,7 +211,7 @@ type mockUCRepublisher struct {
 	mock.Mock
 }
 
-func (m *mockUCRepublisher) RepublishUUIDFromCollection(uuid, tid string, collection CollectionMetadata) (msg *okMsg, wasFound bool, err error) {
+func (m *mockUCRepublisher) RepublishUUIDFromCollection(uuid, tid string, collection CollectionMetadata) (msg *OKMsg, wasFound bool, err error) {
 	args := m.Called(uuid, tid, collection)
-	return args.Get(0).(*okMsg), args.Bool(1), args.Error(2)
+	return args.Get(0).(*OKMsg), args.Bool(1), args.Error(2)
 }
