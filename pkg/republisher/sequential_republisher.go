@@ -1,21 +1,21 @@
-package main
+package republisher
 
 import (
 	log "github.com/sirupsen/logrus"
 )
 
 type notifyingSequentialRepublisher struct {
-	uuidRepublisher uuidRepublisher
+	uuidRepublisher UUIDRepublisher
 }
 
-func newNotifyingSequentialRepublisher(uuidRepublisher uuidRepublisher) bulkRepublisher {
+func NewNotifyingSequentialRepublisher(uuidRepublisher UUIDRepublisher) BulkRepublisher {
 	return &notifyingSequentialRepublisher{
 		uuidRepublisher: uuidRepublisher,
 	}
 }
 
-func (r *notifyingSequentialRepublisher) Republish(uuids []string, publishScope string, tidPrefix string) ([]*okMsg, []error) {
-	var msgs []*okMsg
+func (r *notifyingSequentialRepublisher) Republish(uuids []string, publishScope string, tidPrefix string) ([]*OKMsg, []error) {
+	var msgs []*OKMsg
 	var errs []error
 
 	for _, uuid := range uuids {

@@ -1,36 +1,39 @@
-package main
+package republisher
 
 import (
 	"fmt"
 
-	"github.com/Financial-Times/transactionid-utils-go"
 	log "github.com/sirupsen/logrus"
+
+	transactionidutils "github.com/Financial-Times/transactionid-utils-go"
+
+	"github.com/Financial-Times/publish-failure-resolver-go/pkg/image"
 )
 
-type uuidRepublisher interface {
-	Republish(uuid, tidPrefix string, republishScope string) (msgs []*okMsg, errs []error)
+type UUIDRepublisher interface {
+	Republish(uuid, tidPrefix string, republishScope string) (msgs []*OKMsg, errs []error)
 }
 
-type notifyingUUIDRepublisher struct {
-	ucRepublisher    uuidCollectionRepublisher
-	imageSetResolver imageSetUUIDResolver
-	collections      map[string]targetSystem
+type NotifyingUUIDRepublisher struct {
+	ucRepublisher    UUIDCollectionRepublisher
+	imageSetResolver image.SetUUIDResolver
+	collections      Collections
 }
 
-func newNotifyingUUIDRepublisher(uuidCollectionRepublisher uuidCollectionRepublisher, imageSetResolver imageSetUUIDResolver, collections map[string]targetSystem) *notifyingUUIDRepublisher {
-	return &notifyingUUIDRepublisher{
+func NewNotifyingUUIDRepublisher(uuidCollectionRepublisher UUIDCollectionRepublisher, imageSetResolver image.SetUUIDResolver, collections Collections) *NotifyingUUIDRepublisher {
+	return &NotifyingUUIDRepublisher{
 		ucRepublisher:    uuidCollectionRepublisher,
 		imageSetResolver: imageSetResolver,
 		collections:      collections,
 	}
 }
 
-func (r *notifyingUUIDRepublisher) Republish(uuid, tidPrefix string, republishScope string) (msgs []*okMsg, errs []error) {
+func (r *NotifyingUUIDRepublisher) Republish(uuid, tidPrefix string, republishScope string) (msgs []*OKMsg, errs []error) {
 	isFoundInAnyCollection := false
 	isScopedInAnyCollection := false
 
 	for _, collection := range r.collections {
-		if republishScope != scopeBoth && republishScope != collection.scope {
+		if republishScope != ScopeBoth && republishScope != collection.scope {
 			continue
 		}
 		tid := tidPrefix + transactionidutils.NewTransactionID()

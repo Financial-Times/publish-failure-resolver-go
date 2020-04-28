@@ -1,4 +1,4 @@
-package main
+package api
 
 import (
 	"fmt"
@@ -8,34 +8,34 @@ import (
 	"net/url"
 
 	"github.com/Financial-Times/transactionid-utils-go"
-	"github.com/sirupsen/logrus"
+	log "github.com/sirupsen/logrus"
 )
 
-type nativeMSG struct {
-	body           []byte
-	contentType    string
-	originSystemID string
+type NativeMSG struct {
+	Body           []byte
+	ContentType    string
+	OriginSystemID string
 }
 
-type nativeStoreClientInterface interface {
-	GetNative(collection, uuid, tid string) (nativeContent *nativeMSG, found bool, err error)
+type NativeStoreClientInterface interface {
+	GetNative(collection, uuid, tid string) (nativeContent *NativeMSG, found bool, err error)
 }
 
-type nativeStoreClient struct {
+type NativeStoreClient struct {
 	httpClient    *http.Client
 	nativeAddress string
 	authHeader    string
 }
 
-func newNativeStoreClient(httpClient *http.Client, nativeAddress, authHeader string) *nativeStoreClient {
-	return &nativeStoreClient{
+func NewNativeStoreClient(httpClient *http.Client, nativeAddress, authHeader string) *NativeStoreClient {
+	return &NativeStoreClient{
 		httpClient:    httpClient,
 		nativeAddress: nativeAddress,
 		authHeader:    authHeader,
 	}
 }
 
-func (c *nativeStoreClient) GetNative(collection, uuid, tid string) (nMsg *nativeMSG, found bool, err error) {
+func (c *NativeStoreClient) GetNative(collection, uuid, tid string) (nMsg *NativeMSG, found bool, err error) {
 	nativeURL, err := url.Parse(c.nativeAddress + collection + "/" + uuid)
 	if err != nil {
 		return nil, false, fmt.Errorf("invalid address nativeUrl=%v", nativeURL)
@@ -61,22 +61,22 @@ func (c *nativeStoreClient) GetNative(collection, uuid, tid string) (nMsg *nativ
 		return nil, false, fmt.Errorf("unexpected status while fetching native content uuid=%v collection=%v status=%v", uuid, collection, resp.StatusCode)
 	}
 
-	nMsg = new(nativeMSG)
-	nMsg.body, err = ioutil.ReadAll(resp.Body)
+	nMsg = new(NativeMSG)
+	nMsg.Body, err = ioutil.ReadAll(resp.Body)
 	if err != nil {
 		return nil, true, fmt.Errorf("failed to read response body for uuid=%v %v", uuid, err)
 	}
-	nMsg.contentType = resp.Header.Get(contentTypeHeader)
-	if nMsg.contentType == "" {
-		nMsg.contentType = "application/json"
+	nMsg.ContentType = resp.Header.Get(contentTypeHeader)
+	if nMsg.ContentType == "" {
+		nMsg.ContentType = "application/json"
 	}
-	nMsg.originSystemID = resp.Header.Get(originSystemIDHeader)
+	nMsg.OriginSystemID = resp.Header.Get(originSystemIDHeader)
 	return nMsg, true, nil
 }
 
 func niceClose(resp *http.Response) {
 	err := resp.Body.Close()
 	if err != nil {
-		logrus.Warnf("Couldn't close response body %v", err)
+		log.Warnf("Couldn't close response body %v", err)
 	}
 }

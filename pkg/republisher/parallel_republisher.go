@@ -1,4 +1,4 @@
-package main
+package republisher
 
 import (
 	"sync"
@@ -7,24 +7,24 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-type bulkRepublisher interface {
-	Republish(uuids []string, publishScope string, tidPrefix string) ([]*okMsg, []error)
+type BulkRepublisher interface {
+	Republish(uuids []string, publishScope string, tidPrefix string) ([]*OKMsg, []error)
 }
 
 type notifyingParallelRepublisher struct {
-	uuidRepublisher uuidRepublisher
+	uuidRepublisher UUIDRepublisher
 	balancer        workbalancer.WorkBalancer
 }
 
-func newNotifyingParallelRepublisher(uuidRepublisher uuidRepublisher, parallelism int) bulkRepublisher {
+func NewNotifyingParallelRepublisher(uuidRepublisher UUIDRepublisher, parallelism int) BulkRepublisher {
 	return &notifyingParallelRepublisher{
 		uuidRepublisher: uuidRepublisher,
 		balancer:        workbalancer.NewChannelBalancer(parallelism),
 	}
 }
 
-func (r *notifyingParallelRepublisher) Republish(uuids []string, publishScope string, tidPrefix string) ([]*okMsg, []error) {
-	var msgs []*okMsg
+func (r *notifyingParallelRepublisher) Republish(uuids []string, publishScope string, tidPrefix string) ([]*OKMsg, []error) {
+	var msgs []*OKMsg
 	var errs []error
 	allResultsFetched := sync.WaitGroup{}
 	allResultsFetched.Add(1)
@@ -65,11 +65,11 @@ type publishWork struct {
 	uuid            string
 	publishScope    string
 	tidPrefix       string
-	uuidRepublisher uuidRepublisher
+	uuidRepublisher UUIDRepublisher
 }
 
 type publishResult struct {
-	msgs []*okMsg
+	msgs []*OKMsg
 	errs []error
 }
 

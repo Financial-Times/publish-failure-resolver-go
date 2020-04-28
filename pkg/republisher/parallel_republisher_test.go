@@ -1,4 +1,4 @@
-package main
+package republisher
 
 import (
 	"fmt"
@@ -10,7 +10,7 @@ import (
 
 func TestSingle_Ok(t *testing.T) {
 	mockedUUIDRepublisher := new(mockUUIDRepublisher)
-	msg := okMsg{
+	msg := OKMsg{
 		uuid:                     "19cf2763-90b1-40db-90e7-e813425ebe81",
 		tid:                      "prefix1",
 		collectionName:           "collection1",
@@ -18,11 +18,10 @@ func TestSingle_Ok(t *testing.T) {
 		sizeBytes:                1024,
 		notifierAppName:          "cms-notifier",
 	}
-	mockedUUIDRepublisher.On("Republish", "19cf2763-90b1-40db-90e7-e813425ebe81", "prefix1", scopeBoth).Return([]*okMsg{&msg}, []error{})
+	mockedUUIDRepublisher.On("Republish", "19cf2763-90b1-40db-90e7-e813425ebe81", "prefix1", ScopeBoth).Return([]*OKMsg{&msg}, []error{})
 
-	pRepublisher := newNotifyingParallelRepublisher(mockedUUIDRepublisher, 1)
-
-	pRepublisher.Republish([]string{"19cf2763-90b1-40db-90e7-e813425ebe81"}, scopeBoth, "prefix1")
+	r := NewNotifyingParallelRepublisher(mockedUUIDRepublisher, 1)
+	r.Republish([]string{"19cf2763-90b1-40db-90e7-e813425ebe81"}, ScopeBoth, "prefix1")
 
 	mock.AssertExpectationsForObjects(t, mockedUUIDRepublisher)
 }
@@ -31,14 +30,14 @@ func TestParallel_Ok(t *testing.T) {
 	mockedUUIDRepublisher := new(mockUUIDRepublisher)
 	nOk := 10
 	nErr := 5
-	uuids := []string{}
+	var uuids []string
 	for i := 0; i < nOk; i++ {
 		uuids = append(uuids, "19cf2763-90b1-40db-90e7-e813425ebe81")
 	}
 	for i := 0; i < nErr; i++ {
 		uuids = append(uuids, "70357268-04f7-4149-bb17-217d3eb56d49")
 	}
-	msg1 := okMsg{
+	msg1 := OKMsg{
 		uuid:                     "19cf2763-90b1-40db-90e7-e813425ebe81",
 		tid:                      "prefix1tid_123",
 		collectionName:           "collection1",
@@ -46,7 +45,7 @@ func TestParallel_Ok(t *testing.T) {
 		sizeBytes:                1024,
 		notifierAppName:          "cms-notifier",
 	}
-	msg2 := okMsg{
+	msg2 := OKMsg{
 		uuid:                     "19cf2763-90b1-40db-90e7-e813425ebe81",
 		tid:                      "prefix1tid_456",
 		collectionName:           "collection2",
@@ -56,11 +55,11 @@ func TestParallel_Ok(t *testing.T) {
 	}
 	err1 := fmt.Errorf("test some error publishing 1")
 	err2 := fmt.Errorf("test some error publishing 2")
-	mockedUUIDRepublisher.On("Republish", "19cf2763-90b1-40db-90e7-e813425ebe81", "prefix1", scopeBoth).Times(nOk).Return([]*okMsg{&msg1, &msg2}, []error{})
-	mockedUUIDRepublisher.On("Republish", "70357268-04f7-4149-bb17-217d3eb56d49", "prefix1", scopeBoth).Times(nErr).Return([]*okMsg{}, []error{err1, err2})
-	pRepublisher := newNotifyingParallelRepublisher(mockedUUIDRepublisher, 2)
+	mockedUUIDRepublisher.On("Republish", "19cf2763-90b1-40db-90e7-e813425ebe81", "prefix1", ScopeBoth).Times(nOk).Return([]*OKMsg{&msg1, &msg2}, []error{})
+	mockedUUIDRepublisher.On("Republish", "70357268-04f7-4149-bb17-217d3eb56d49", "prefix1", ScopeBoth).Times(nErr).Return([]*OKMsg{}, []error{err1, err2})
+	r := NewNotifyingParallelRepublisher(mockedUUIDRepublisher, 2)
 
-	actualMsgs, actualErrs := pRepublisher.Republish(uuids, scopeBoth, "prefix1")
+	actualMsgs, actualErrs := r.Republish(uuids, ScopeBoth, "prefix1")
 
 	mock.AssertExpectationsForObjects(t, mockedUUIDRepublisher)
 	assert.Equal(t, 2*nOk, len(actualMsgs))
@@ -91,7 +90,7 @@ type mockUUIDRepublisher struct {
 	mock.Mock
 }
 
-func (m *mockUUIDRepublisher) Republish(uuid, tidPrefix string, republishScope string) (msgs []*okMsg, errs []error) {
+func (m *mockUUIDRepublisher) Republish(uuid, tidPrefix string, republishScope string) (msgs []*OKMsg, errs []error) {
 	args := m.Called(uuid, tidPrefix, republishScope)
-	return args.Get(0).([]*okMsg), args.Get(1).([]error)
+	return args.Get(0).([]*OKMsg), args.Get(1).([]error)
 }
