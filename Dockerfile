@@ -16,7 +16,7 @@ RUN VERSION="version=$(git describe --tag --always 2> /dev/null)" \
     && echo "Build flags: ${LDFLAGS}"
 
 # Multi-stage build - copy only the certs and the binary into the image
-FROM scratch
+FROM alpine
 WORKDIR /
 COPY --from=0 /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
 COPY --from=0 /artifacts/* /
