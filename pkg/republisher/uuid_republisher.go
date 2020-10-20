@@ -85,7 +85,7 @@ func (r *NotifyingUUIDRepublisher) Republish(uuid, tidPrefix string, republishSc
 			return nil, errs
 		}
 		log.Infof("uuid=%v was found to be an ImageSet having an imageModelUUID=%v", uuid, imageModelUUID)
-		msg, isFound, err := r.ucRepublisher.RepublishUUIDFromCollection(imageModelUUID, tid, r.collections["universal-content"])
+		msg, isFound, err := r.ucRepublisher.RepublishUUIDFromCollection(imageModelUUID, tid, r.collections["methode"])
 		if err != nil {
 			errs = append(errs, fmt.Errorf("error publishing %v", err))
 			return nil, errs
