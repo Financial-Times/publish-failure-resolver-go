@@ -31,11 +31,10 @@ func NewNotifyingUUIDRepublisher(uuidCollectionRepublisher UUIDCollectionRepubli
 func (r *NotifyingUUIDRepublisher) Republish(uuid, tidPrefix string, republishScope string) (msgs []*OKMsg, errs []error) {
 	isFoundInAnyCollection := false
 	isScopedInAnyCollection := false
+	priorityCollection := r.collections["universal-content"]
+	isFoundInPriorityCollection := false
 
-	for _, collection := range r.collections {
-		if republishScope != ScopeBoth && republishScope != collection.scope {
-			continue
-		}
+	republishFrom := func(collection CollectionMetadata) []*OKMsg {
 		tid := tidPrefix + transactionidutils.NewTransactionID()
 		isScopedInAnyCollection = true
 		msg, isFound, err := r.ucRepublisher.RepublishUUIDFromCollection(uuid, tid, collection)
@@ -47,6 +46,30 @@ func (r *NotifyingUUIDRepublisher) Republish(uuid, tidPrefix string, republishSc
 		}
 		if msg != nil {
 			msgs = append(msgs, msg)
+		}
+		return msgs
+	}
+
+	if republishScope == ScopeBoth || republishScope == ScopeContent {
+		// try priority content collection first
+		msgs = republishFrom(priorityCollection)
+		isFoundInPriorityCollection = isFoundInAnyCollection
+		// if not found in priority, try all other content
+		if !isFoundInPriorityCollection {
+			for _, collection := range r.collections {
+				if collection.scope == ScopeContent {
+					msgs = republishFrom(collection)
+				}
+			}
+		}
+	}
+
+	// republish metadata when scope requires it
+	if republishScope == ScopeBoth || republishScope == ScopeMetadata {
+		for _, collection := range r.collections {
+			if collection.scope == ScopeMetadata {
+				msgs = republishFrom(collection)
+			}
 		}
 	}
 
