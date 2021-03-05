@@ -12,9 +12,11 @@ import (
 )
 
 type NativeMSG struct {
-	Body           []byte
-	ContentType    string
-	OriginSystemID string
+	Body            []byte
+	ContentType     string
+	OriginSystemID  string
+	SchemaVersion   string
+	ContentRevision string
 }
 
 type NativeStoreClientInterface interface {
@@ -69,6 +71,12 @@ func (c *NativeStoreClient) GetNative(collection, uuid, tid string) (nMsg *Nativ
 	nMsg.ContentType = resp.Header.Get(contentTypeHeader)
 	if nMsg.ContentType == "" {
 		nMsg.ContentType = "application/json"
+	}
+	if svHeader := resp.Header.Get(schemaVersionHeader); svHeader != "" {
+		nMsg.SchemaVersion = svHeader
+	}
+	if crHeader := resp.Header.Get(contentRevisionHeader); crHeader != "" {
+		nMsg.ContentRevision = crHeader
 	}
 	nMsg.OriginSystemID = resp.Header.Get(originSystemIDHeader)
 	return nMsg, true, nil
