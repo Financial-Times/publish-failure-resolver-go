@@ -16,6 +16,8 @@ const (
 	contentTypeHeader     string = "Content-Type"
 	xOriginSystemIDHeader string = "X-Origin-System-Id"
 	originSystemIDHeader  string = "Origin-System-Id"
+	schemaVersionHeader   string = "X-Schema-Version"
+	contentRevisionHeader string = "X-Content-Revision"
 )
 
 type NotifierClient interface {
@@ -49,6 +51,8 @@ func (c *HTTPNotifier) Notify(nMsg *NativeMSG, notifierApp, uuid, tid string) er
 	req.Header.Add("Authorization", c.authHeader)
 	req.Header.Add(contentTypeHeader, nMsg.ContentType)
 	req.Header.Add(xOriginSystemIDHeader, nMsg.OriginSystemID)
+	req.Header.Add(schemaVersionHeader, nMsg.SchemaVersion)
+	req.Header.Add(contentRevisionHeader, nMsg.ContentRevision)
 	req.Header.Set("Connection", "close")
 	resp, err := c.httpClient.Do(req)
 	if err != nil {
