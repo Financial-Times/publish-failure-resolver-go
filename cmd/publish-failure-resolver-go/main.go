@@ -1,7 +1,9 @@
 package main
 
 import (
+	"bufio"
 	"encoding/base64"
+	"fmt"
 	"os"
 	"regexp"
 	"strings"
@@ -37,7 +39,7 @@ func main() {
 	uuidList := app.String(cli.StringOpt{
 		Name:  "uuidList",
 		Value: "",
-		Desc:  "Uuid list that you want to repbulish.",
+		Desc:  "Uuid list that you want to republish.",
 	})
 	transactionIDPrefix := app.String(cli.StringOpt{
 		Name:  "transactionIdPrefix",
@@ -74,6 +76,11 @@ func main() {
 		Value: 1,
 		Desc:  "Number of parallel threads to take uuids and republish independently. must >= 1 (e.g. 16)",
 	})
+	denylistPath := app.String(cli.StringOpt{
+		Name:  "denylist",
+		Value: "/denylist.txt",
+		Desc:  "Path to UUID collection which are denied from updating.",
+	})
 
 	log.SetLevel(log.InfoLevel)
 	log.Infof("[Startup] publish-failure-resolver-go is starting ")
@@ -88,6 +95,7 @@ func main() {
 		log.Infof("republishScope=%v", *republishScope)
 		log.Infof("rateLimitMs=%v", *rateLimitMs)
 		log.Infof("parallelism=%v", *parallelism)
+		log.Infof("denylistPath=%v", *denylistPath)
 
 		httpClient := http.NewHTTPClient()
 		nativeStoreClient := api.NewNativeStoreClient(httpClient, "https://"+*sourceEnvHost+"/__nativerw/", "Basic "+base64.StdEncoding.EncodeToString([]byte(*sourceAuth)))
@@ -113,6 +121,14 @@ func main() {
 		}
 
 		uuids := regSplit(*uuidList)
+
+		denylistedUUIDs, err := readDenylistedUUIDs(*denylistPath)
+		if err != nil {
+			log.Fatalf("Couldn't read deny-listed UUIDs. %v", err)
+		}
+
+		uuids = removeDenylistedUUIDs(uuids, denylistedUUIDs)
+
 		log.Infof("uuidList=%v", uuids)
 		_, errs := r.Republish(uuids, *republishScope, *transactionIDPrefix)
 
@@ -127,6 +143,47 @@ func main() {
 		log.Errorf("App could not start, error=[%s]\n", err)
 		return
 	}
+}
+
+// Returns a list of all deny-listed from republishing UUIDs.
+func readDenylistedUUIDs(denylistPath string) ([]string, error) {
+	file, err := os.Open(denylistPath)
+	if err != nil {
+		return nil, fmt.Errorf("opening file: %w", err)
+	}
+	defer file.Close()
+
+	var denylistedUUIDs []string
+
+	scanner := bufio.NewScanner(file)
+	for scanner.Scan() {
+		denylistedUUIDs = append(denylistedUUIDs, scanner.Text())
+	}
+
+	if err = scanner.Err(); err != nil {
+		return nil, fmt.Errorf("scanning error: %w", err)
+	}
+
+	return denylistedUUIDs, nil
+}
+
+// Filters out deny-listed UUIDs from scheduled for republishing ones.
+func removeDenylistedUUIDs(republishUUIDs, denylistedUUIDs []string) []string {
+	denylisted := make(map[string]struct{}, len(denylistedUUIDs))
+
+	for _, uuid := range denylistedUUIDs {
+		denylisted[uuid] = struct{}{}
+	}
+
+	filteredUUIDs := make([]string, 0, len(republishUUIDs))
+
+	for _, uuid := range republishUUIDs {
+		if _, ok := denylisted[uuid]; !ok {
+			filteredUUIDs = append(filteredUUIDs, uuid)
+		}
+	}
+
+	return filteredUUIDs
 }
 
 func regSplit(text string) []string {
