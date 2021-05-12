@@ -48,12 +48,6 @@ var DefaultCollections = Collections{
 		notifierApp:           CmsMetadataNotifier,
 		scope:                 ScopeMetadata,
 	},
-	"v1-metadata": {
-		name:                  "v1-metadata",
-		defaultOriginSystemID: "http://cmdb.ft.com/systems/methode-web-pub",
-		notifierApp:           CmsMetadataNotifier,
-		scope:                 ScopeMetadata,
-	},
 	"next-video-editor": {
 		name:                  "video-metadata",
 		defaultOriginSystemID: "http://cmdb.ft.com/systems/next-video-editor",
