@@ -54,4 +54,10 @@ var DefaultCollections = Collections{
 		notifierApp:           CmsMetadataNotifier,
 		scope:                 ScopeMetadata,
 	},
+	"pages": {
+		name:                  "pages",
+		defaultOriginSystemID: "http://cmdb.ft.com/systems/spark-lists",
+		notifierApp:           CmsNotifier,
+		scope:                 ScopeContent,
+	},
 }
