@@ -6,8 +6,6 @@
 
 Reimport and/or republish content and lists in UPP.
 
-Able to recognize image-sets if they are present in delivery's mongo, `upp-store/content`.
-
 Parallelism and rate limiting configurable.
 
 ## Installation
@@ -24,10 +22,8 @@ go build -mod=readonly .
 ./publish-failure-resolver-go \
   --sourceEnvHost="upp-staging-publish-eu.ft.com" \
   --targetEnvHost="upp-staging-publish-eu.ft.com" \
-  --deliveryEnvHost="upp-staging-delivery-eu.ft.com" \
   --sourceAuth="username:password" \
   --targetAuth="username:password" \
-  --deliveryAuth="username:password" \
   --republishScope="both" \
   --transactionIdPrefix="test76" \
   --rateLimitMs=200 \

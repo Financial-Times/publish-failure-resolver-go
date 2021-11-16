@@ -10,12 +10,6 @@ import (
 )
 
 var testCollections = Collections{
-	"methode": {
-		name:                  "methode",
-		defaultOriginSystemID: "methode-web-pub",
-		notifierApp:           CmsNotifier,
-		scope:                 ScopeContent,
-	},
 	"wordpress": {
 		name:                  "wordpress",
 		defaultOriginSystemID: "wordpress",
@@ -52,14 +46,13 @@ var testCollectionsSingle = Collections{
 }
 
 func TestOkAndSoftErrors_Ok(t *testing.T) {
-	mockedDocStoreClient := new(mockDocStoreClient)
 	mockedUCRepublisher := new(mockUCRepublisher)
-	republisher := NewNotifyingUUIDRepublisher(mockedUCRepublisher, mockedDocStoreClient, testCollections)
+	republisher := NewNotifyingUUIDRepublisher(mockedUCRepublisher, testCollections)
 	msg := OKMsg{
 		uuid:                     "b3ec9282-1073-46ad-9d44-144dad7fe956",
 		tid:                      "prefix1",
-		collectionName:           "methode",
-		collectionOriginSystemID: "methode-web-pub",
+		collectionName:           "wordpress",
+		collectionOriginSystemID: "cct",
 		sizeBytes:                1024,
 		notifierAppName:          "cms-notifier",
 	}
@@ -75,10 +68,8 @@ func TestOkAndSoftErrors_Ok(t *testing.T) {
 
 	expectedMsgs := []*OKMsg{&msg, &msg2}
 	var nilMsg *OKMsg
-	mockedUCRepublisher.On("RepublishUUIDFromCollection", "b3ec9282-1073-46ad-9d44-144dad7fe956", mock.MatchedBy(func(tid string) bool { return strings.HasPrefix(tid, "prefix1") }), testCollections["methode"]).Return(&msg, true, nil)
 	mockedUCRepublisher.On("RepublishUUIDFromCollection", "b3ec9282-1073-46ad-9d44-144dad7fe956", mock.MatchedBy(func(tid string) bool { return strings.HasPrefix(tid, "prefix1") }), testCollections["pac-metadata"]).Return(&msg2, true, nil)
-	mockedUCRepublisher.On("RepublishUUIDFromCollection", "b3ec9282-1073-46ad-9d44-144dad7fe956", mock.MatchedBy(func(tid string) bool { return strings.HasPrefix(tid, "prefix1") }), testCollections["wordpress"]).Return(nilMsg, false, nil)
-	mockedUCRepublisher.On("RepublishUUIDFromCollection", "b3ec9282-1073-46ad-9d44-144dad7fe956", mock.MatchedBy(func(tid string) bool { return strings.HasPrefix(tid, "prefix1") }), testCollections["universal-content"]).Return(nilMsg, false, nil)
+	mockedUCRepublisher.On("RepublishUUIDFromCollection", "b3ec9282-1073-46ad-9d44-144dad7fe956", mock.MatchedBy(func(tid string) bool { return strings.HasPrefix(tid, "prefix1") }), testCollections["wordpress"]).Return(&msg, true, nil)
 	mockedUCRepublisher.On("RepublishUUIDFromCollection", "b3ec9282-1073-46ad-9d44-144dad7fe956", mock.MatchedBy(func(tid string) bool { return strings.HasPrefix(tid, "prefix1") }), testCollections["universal-content"]).Return(nilMsg, false, nil)
 	mockedUCRepublisher.On("RepublishUUIDFromCollection", "b3ec9282-1073-46ad-9d44-144dad7fe956", mock.MatchedBy(func(tid string) bool { return strings.HasPrefix(tid, "prefix1") }), testCollections["video"]).Return(nilMsg, false, fmt.Errorf("test error let's say 401"))
 
@@ -91,18 +82,17 @@ func TestOkAndSoftErrors_Ok(t *testing.T) {
 }
 
 func TestNotScoped_Ok(t *testing.T) {
-	mockedDocStoreClient := new(mockDocStoreClient)
 	mockedUCRepublisher := new(mockUCRepublisher)
-	r := NewNotifyingUUIDRepublisher(mockedUCRepublisher, mockedDocStoreClient, testCollectionsSingle)
+	r := NewNotifyingUUIDRepublisher(mockedUCRepublisher, testCollectionsSingle)
 	msg := OKMsg{
 		uuid:                     "b3ec9282-1073-46ad-9d44-144dad7fe956",
 		tid:                      "prefix1",
-		collectionName:           "universal-content",
+		collectionName:           "wordpress",
 		collectionOriginSystemID: "cct",
 		sizeBytes:                1024,
 		notifierAppName:          "cms-notifier",
 	}
-	mockedUCRepublisher.On("RepublishUUIDFromCollection", "b3ec9282-1073-46ad-9d44-144dad7fe956", mock.MatchedBy(func(tid string) bool { return strings.HasPrefix(tid, "prefix1") }), testCollections["methode"]).Return(&msg, true, nil)
+	mockedUCRepublisher.On("RepublishUUIDFromCollection", "b3ec9282-1073-46ad-9d44-144dad7fe956", mock.MatchedBy(func(tid string) bool { return strings.HasPrefix(tid, "prefix1") }), testCollections["wordpress"]).Return(&msg, true, nil)
 
 	msgs, errs := r.Republish("b3ec9282-1073-46ad-9d44-144dad7fe956", "prefix1", "metadata")
 
@@ -110,86 +100,8 @@ func TestNotScoped_Ok(t *testing.T) {
 	assert.Equal(t, 0, len(errs))
 }
 
-func TestFoundInNoneFoundInDocStore_Ok(t *testing.T) {
+func TestUUIDInUCAndWordpressRepublishedInUC(t *testing.T) {
 	mockedUCRepublisher := new(mockUCRepublisher)
-	msg := OKMsg{
-		uuid:                     "64bc4319-cd22-43e9-8b12-358622d7a5ba",
-		tid:                      "prefix1tid_123",
-		collectionName:           "methode",
-		collectionOriginSystemID: "methode-web-pub",
-		sizeBytes:                1024,
-		notifierAppName:          "cms-notifier",
-	}
-	var nilMsg *OKMsg
-	mockedUCRepublisher.On("RepublishUUIDFromCollection", "64bc4319-cd22-43e9-8b12-358622d7a5ba", mock.MatchedBy(func(tid string) bool { return strings.HasPrefix(tid, "prefix1") }), testCollections["methode"]).Return(&msg, true, nil)
-	mockedUCRepublisher.On("RepublishUUIDFromCollection", "b3ec9282-1073-46ad-9d44-144dad7fe956", mock.MatchedBy(func(tid string) bool { return strings.HasPrefix(tid, "prefix1") }), testCollections["methode"]).Return(nilMsg, false, nil)
-	mockedUCRepublisher.On("RepublishUUIDFromCollection", "b3ec9282-1073-46ad-9d44-144dad7fe956", mock.MatchedBy(func(tid string) bool { return strings.HasPrefix(tid, "prefix1") }), testCollections["universal-content"]).Return(nilMsg, false, nil)
-	mockedUCRepublisher.On("RepublishUUIDFromCollection", "b3ec9282-1073-46ad-9d44-144dad7fe956", mock.MatchedBy(func(tid string) bool { return strings.HasPrefix(tid, "prefix1") }), testCollections["pac-metadata"]).Return(nilMsg, false, nil)
-	mockedUCRepublisher.On("RepublishUUIDFromCollection", "b3ec9282-1073-46ad-9d44-144dad7fe956", mock.MatchedBy(func(tid string) bool { return strings.HasPrefix(tid, "prefix1") }), testCollections["wordpress"]).Return(nilMsg, false, nil)
-	mockedUCRepublisher.On("RepublishUUIDFromCollection", "b3ec9282-1073-46ad-9d44-144dad7fe956", mock.MatchedBy(func(tid string) bool { return strings.HasPrefix(tid, "prefix1") }), testCollections["video"]).Return(nilMsg, false, nil)
-
-	mockedDocStoreClient := new(mockDocStoreClient)
-	mockedDocStoreClient.On("GetImageSetsModelUUID", "b3ec9282-1073-46ad-9d44-144dad7fe956", mock.MatchedBy(func(tid string) bool { return strings.HasPrefix(tid, "prefix1") })).Return(true, "64bc4319-cd22-43e9-8b12-358622d7a5ba", nil)
-	r := NewNotifyingUUIDRepublisher(mockedUCRepublisher, mockedDocStoreClient, testCollections)
-
-	msgs, errs := r.Republish("b3ec9282-1073-46ad-9d44-144dad7fe956", "prefix1", "both")
-
-	assert.Equal(t, 1, len(msgs))
-	assert.Equal(t, 0, len(errs))
-	assert.Equal(t, msg, *msgs[0])
-}
-
-func TestFoundInNoneErrInDocStore_Err(t *testing.T) {
-	mockedUCRepublisher := new(mockUCRepublisher)
-	msg := OKMsg{
-		uuid:                     "64bc4319-cd22-43e9-8b12-358622d7a5ba",
-		tid:                      "prefix1tid_123",
-		collectionName:           "universal-content",
-		collectionOriginSystemID: "cct",
-		sizeBytes:                1024,
-		notifierAppName:          "cms-notifier",
-	}
-	var nilMsg *OKMsg
-	mockedUCRepublisher.On("RepublishUUIDFromCollection", "b3ec9282-1073-46ad-9d44-144dad7fe956", mock.MatchedBy(func(tid string) bool { return strings.HasPrefix(tid, "prefix1") }), testCollections["universal-content"]).Return(nilMsg, false, nil)
-	mockedUCRepublisher.On("RepublishUUIDFromCollection", "64bc4319-cd22-43e9-8b12-358622d7a5ba", mock.MatchedBy(func(tid string) bool { return strings.HasPrefix(tid, "prefix1") }), testCollections["universal-content"]).Return(&msg, true, nil)
-	mockedDocStoreClient := new(mockDocStoreClient)
-	mockedDocStoreClient.On("GetImageSetsModelUUID", "b3ec9282-1073-46ad-9d44-144dad7fe956", mock.MatchedBy(func(tid string) bool { return strings.HasPrefix(tid, "prefix1") })).Return(false, "", fmt.Errorf("error in dsapi, maybe 401"))
-	r := NewNotifyingUUIDRepublisher(mockedUCRepublisher, mockedDocStoreClient, testCollectionsSingle)
-
-	msgs, errs := r.Republish("b3ec9282-1073-46ad-9d44-144dad7fe956", "prefix1", "both")
-
-	assert.Equal(t, 0, len(msgs))
-	assert.Equal(t, 1, len(errs))
-	assert.True(t, strings.HasSuffix(errs[0].Error(), "error in dsapi, maybe 401"))
-}
-
-func TestFoundInNoneAndNotFoundInDocStore_Ok(t *testing.T) {
-	mockedUCRepublisher := new(mockUCRepublisher)
-	msg := OKMsg{
-		uuid:                     "64bc4319-cd22-43e9-8b12-358622d7a5ba",
-		tid:                      "prefix1tid_123",
-		collectionName:           "universal-content",
-		collectionOriginSystemID: "cct",
-		sizeBytes:                1024,
-		notifierAppName:          "cms-notifier",
-	}
-	var nilMsg *OKMsg
-	mockedUCRepublisher.On("RepublishUUIDFromCollection", "b3ec9282-1073-46ad-9d44-144dad7fe956", mock.MatchedBy(func(tid string) bool { return strings.HasPrefix(tid, "prefix1") }), testCollections["universal-content"]).Return(nilMsg, false, nil)
-	mockedUCRepublisher.On("RepublishUUIDFromCollection", "64bc4319-cd22-43e9-8b12-358622d7a5ba", mock.MatchedBy(func(tid string) bool { return strings.HasPrefix(tid, "prefix1") }), testCollections["universal-content"]).Return(&msg, true, nil)
-	mockedDocStoreClient := new(mockDocStoreClient)
-	mockedDocStoreClient.On("GetImageSetsModelUUID", "b3ec9282-1073-46ad-9d44-144dad7fe956", mock.MatchedBy(func(tid string) bool { return strings.HasPrefix(tid, "prefix1") })).Return(false, "", nil)
-	r := NewNotifyingUUIDRepublisher(mockedUCRepublisher, mockedDocStoreClient, testCollectionsSingle)
-
-	msgs, errs := r.Republish("b3ec9282-1073-46ad-9d44-144dad7fe956", "prefix1", "both")
-
-	assert.Equal(t, 0, len(msgs))
-	assert.Equal(t, 1, len(errs))
-	assert.True(t, strings.HasSuffix(errs[0].Error(), "wasn't found in any of the native-store's collections and it's not an ImageSet"))
-}
-
-func TestUUIDInUCAndMethodeRepublishedInUC(t *testing.T) {
-	mockedUCRepublisher := new(mockUCRepublisher)
-	mockedDocStoreClient := new(mockDocStoreClient)
 	msg := OKMsg{
 		uuid:                     "64bc4319-cd22-43e9-8b12-358622d7a5ba",
 		tid:                      "prefix1tid_123",
@@ -211,8 +123,8 @@ func TestUUIDInUCAndMethodeRepublishedInUC(t *testing.T) {
 	msg3 := OKMsg{
 		uuid:                     "b3ec9282-1073-46ad-9d44-144dad7fe956",
 		tid:                      "prefix1",
-		collectionName:           "methode",
-		collectionOriginSystemID: "methode-web-pub",
+		collectionName:           "wordpress",
+		collectionOriginSystemID: "cct",
 		sizeBytes:                1024,
 		notifierAppName:          "cms-notifier",
 	}
@@ -220,10 +132,9 @@ func TestUUIDInUCAndMethodeRepublishedInUC(t *testing.T) {
 	var nilMsg *OKMsg
 	mockedUCRepublisher.On("RepublishUUIDFromCollection", "64bc4319-cd22-43e9-8b12-358622d7a5ba", mock.MatchedBy(func(tid string) bool { return strings.HasPrefix(tid, "prefix1") }), testCollections["universal-content"]).Return(&msg, true, nil)
 	mockedUCRepublisher.On("RepublishUUIDFromCollection", "64bc4319-cd22-43e9-8b12-358622d7a5ba", mock.MatchedBy(func(tid string) bool { return strings.HasPrefix(tid, "prefix1") }), testCollections["pac-metadata"]).Return(&msg2, true, nil)
-	mockedUCRepublisher.On("RepublishUUIDFromCollection", "64bc4319-cd22-43e9-8b12-358622d7a5ba", mock.MatchedBy(func(tid string) bool { return strings.HasPrefix(tid, "prefix1") }), testCollections["methode"]).Return(&msg3, true, nil)
-	mockedUCRepublisher.On("RepublishUUIDFromCollection", "64bc4319-cd22-43e9-8b12-358622d7a5ba", mock.MatchedBy(func(tid string) bool { return strings.HasPrefix(tid, "prefix1") }), testCollections["wordpress"]).Return(nilMsg, false, nil)
+	mockedUCRepublisher.On("RepublishUUIDFromCollection", "64bc4319-cd22-43e9-8b12-358622d7a5ba", mock.MatchedBy(func(tid string) bool { return strings.HasPrefix(tid, "prefix1") }), testCollections["wordpress"]).Return(msg3, true, nil)
 	mockedUCRepublisher.On("RepublishUUIDFromCollection", "64bc4319-cd22-43e9-8b12-358622d7a5ba", mock.MatchedBy(func(tid string) bool { return strings.HasPrefix(tid, "prefix1") }), testCollections["video"]).Return(nilMsg, false, nil)
-	r := NewNotifyingUUIDRepublisher(mockedUCRepublisher, mockedDocStoreClient, testCollections)
+	r := NewNotifyingUUIDRepublisher(mockedUCRepublisher, testCollections)
 
 	msgs, errs := r.Republish("64bc4319-cd22-43e9-8b12-358622d7a5ba", "prefix1", ScopeBoth)
 
@@ -248,15 +159,14 @@ func TestUUIDInUCAndMethodeRepublishedInUC(t *testing.T) {
 	assert.Equal(t, msg, *msgs[0])
 }
 
-func TestUUIDInMethodeNotInUC(t *testing.T) {
+func TestUUIDInWordpressNotInUC(t *testing.T) {
 	mockedUCRepublisher := new(mockUCRepublisher)
-	mockedDocStoreClient := new(mockDocStoreClient)
-	r := NewNotifyingUUIDRepublisher(mockedUCRepublisher, mockedDocStoreClient, testCollections)
+	r := NewNotifyingUUIDRepublisher(mockedUCRepublisher, testCollections)
 	msg := OKMsg{
 		uuid:                     "64bc4319-cd22-43e9-8b12-358622d7a5ba",
 		tid:                      "prefix1tid_123",
-		collectionName:           "methode",
-		collectionOriginSystemID: "methode-web-pub",
+		collectionName:           "wordpress",
+		collectionOriginSystemID: "cct",
 		sizeBytes:                1024,
 		notifierAppName:          "cms-notifier",
 	}
@@ -270,10 +180,9 @@ func TestUUIDInMethodeNotInUC(t *testing.T) {
 	}
 
 	var nilMsg *OKMsg
-	mockedUCRepublisher.On("RepublishUUIDFromCollection", "64bc4319-cd22-43e9-8b12-358622d7a5ba", mock.MatchedBy(func(tid string) bool { return strings.HasPrefix(tid, "prefix1") }), testCollections["methode"]).Return(&msg, true, nil)
 	mockedUCRepublisher.On("RepublishUUIDFromCollection", "64bc4319-cd22-43e9-8b12-358622d7a5ba", mock.MatchedBy(func(tid string) bool { return strings.HasPrefix(tid, "prefix1") }), testCollections["pac-metadata"]).Return(&msg2, true, nil)
 	mockedUCRepublisher.On("RepublishUUIDFromCollection", "64bc4319-cd22-43e9-8b12-358622d7a5ba", mock.MatchedBy(func(tid string) bool { return strings.HasPrefix(tid, "prefix1") }), testCollections["universal-content"]).Return(nilMsg, false, nil)
-	mockedUCRepublisher.On("RepublishUUIDFromCollection", "64bc4319-cd22-43e9-8b12-358622d7a5ba", mock.MatchedBy(func(tid string) bool { return strings.HasPrefix(tid, "prefix1") }), testCollections["wordpress"]).Return(nilMsg, false, nil)
+	mockedUCRepublisher.On("RepublishUUIDFromCollection", "64bc4319-cd22-43e9-8b12-358622d7a5ba", mock.MatchedBy(func(tid string) bool { return strings.HasPrefix(tid, "prefix1") }), testCollections["wordpress"]).Return(&msg, true, nil)
 	mockedUCRepublisher.On("RepublishUUIDFromCollection", "64bc4319-cd22-43e9-8b12-358622d7a5ba", mock.MatchedBy(func(tid string) bool { return strings.HasPrefix(tid, "prefix1") }), testCollections["video"]).Return(nilMsg, false, nil)
 
 	msgs, errs := r.Republish("64bc4319-cd22-43e9-8b12-358622d7a5ba", "prefix1", ScopeBoth)
@@ -296,15 +205,6 @@ func TestUUIDInMethodeNotInUC(t *testing.T) {
 	assert.Equal(t, 1, len(msgs))
 	assert.Equal(t, 0, len(errs))
 	assert.Equal(t, msg, *msgs[0])
-}
-
-type mockDocStoreClient struct {
-	mock.Mock
-}
-
-func (m *mockDocStoreClient) GetImageSetsModelUUID(setUUID, tid string) (bool, string, error) {
-	args := m.Called(setUUID, tid)
-	return args.Bool(0), args.String(1), args.Error(2)
 }
 
 type mockUCRepublisher struct {
