@@ -9,12 +9,11 @@ import (
 	"strings"
 	"time"
 
-	"github.com/jawher/mow.cli"
+	cli "github.com/jawher/mow.cli"
 	log "github.com/sirupsen/logrus"
 
 	"github.com/Financial-Times/publish-failure-resolver-go/pkg/http"
 	"github.com/Financial-Times/publish-failure-resolver-go/pkg/http/api"
-	"github.com/Financial-Times/publish-failure-resolver-go/pkg/image"
 	"github.com/Financial-Times/publish-failure-resolver-go/pkg/republisher"
 )
 
@@ -56,11 +55,6 @@ func main() {
 		Value: "",
 		Desc:  "Target env credentials in format username:password (e.g. ops-01-01-2077:ABCDabcd)",
 	})
-	deliveryAuth := app.String(cli.StringOpt{
-		Name:  "deliveryAuth",
-		Value: "",
-		Desc:  "Delivery env credentials in format username:password (e.g. ops-01-01-2077:ABCDabcd)",
-	})
 	republishScope := app.String(cli.StringOpt{
 		Name:  "republishScope",
 		Value: "both",
@@ -100,15 +94,9 @@ func main() {
 		httpClient := http.NewHTTPClient()
 		nativeStoreClient := api.NewNativeStoreClient(httpClient, "https://"+*sourceEnvHost+"/__nativerw/", "Basic "+base64.StdEncoding.EncodeToString([]byte(*sourceAuth)))
 		notifierClient, err := api.NewHTTPNotifier(httpClient, "https://"+*targetEnvHost+"/__", "Basic "+base64.StdEncoding.EncodeToString([]byte(*targetAuth)))
-		var imageSetResolver image.SetUUIDResolver
-		if *deliveryEnvHost == "" || *deliveryAuth == "" {
-			imageSetResolver = image.NewUUIDImageSetResolver()
-		} else {
-			imageSetResolver, err = api.NewHTTPDocStore(httpClient, "https://"+*deliveryEnvHost+"/__document-store-api/content", "Basic "+base64.StdEncoding.EncodeToString([]byte(*deliveryAuth)))
-		}
 		rateLimit := time.Duration(*rateLimitMs) * time.Millisecond
 		uuidCollectionRepublisher := republisher.NewNotifyingUCRepublisher(notifierClient, nativeStoreClient, rateLimit)
-		uuidRepublisher := republisher.NewNotifyingUUIDRepublisher(uuidCollectionRepublisher, imageSetResolver, republisher.DefaultCollections)
+		uuidRepublisher := republisher.NewNotifyingUUIDRepublisher(uuidCollectionRepublisher, republisher.DefaultCollections)
 		var r republisher.BulkRepublisher
 		if *parallelism > 1 {
 			r = republisher.NewNotifyingParallelRepublisher(uuidRepublisher, *parallelism)
