@@ -18,12 +18,6 @@ type CollectionMetadata struct {
 }
 
 var DefaultCollections = Collections{
-	"methode": {
-		name:                  "methode",
-		defaultOriginSystemID: "http://cmdb.ft.com/systems/methode-web-pub",
-		notifierApp:           CmsNotifier,
-		scope:                 ScopeContent,
-	},
 	"wordpress": {
 		name:                  "wordpress",
 		defaultOriginSystemID: "http://cmdb.ft.com/systems/wordpress",
