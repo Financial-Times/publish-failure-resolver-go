@@ -18,12 +18,6 @@ type CollectionMetadata struct {
 }
 
 var DefaultCollections = Collections{
-	"wordpress": {
-		name:                  "wordpress",
-		defaultOriginSystemID: "http://cmdb.ft.com/systems/wordpress",
-		notifierApp:           CmsNotifier,
-		scope:                 ScopeContent,
-	},
 	"universal-content": {
 		name:                  "universal-content",
 		defaultOriginSystemID: "http://cmdb.ft.com/systems/cct",
