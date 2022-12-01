@@ -52,10 +52,10 @@ docker build -t publish-failure-resolver-go:local .
 
 ### Logging
 
-* The application uses [logrus](https://github.com/sirupsen/logrus); the log file is initialised in [main.go](main.go).
+* The application uses [logrus](https://github.com/sirupsen/logrus); the log file is initialised in [main.go](cmd/publish-failure-resolver-go/main.go).
 
 ## Notes
 
 Rate limit applies only to notifier endpoints, so searching in native-store and in upp-store are not considered rate limited actions.
 
-The respective [jenkins job can be found here](http://ftjen06609-lvpr-uk-p:8181). Search for _Republish Failed Content and Metadata k8s go_
+The respective [jenkins job can be found here](https://upp-jenkins-k8s-prod.upp.ft.com/job/publish-utils/job/OLD%20-%20For%20Developers%20-%20Republish%20Failed%20Content%20and%20Metadata/), or if searched for _Republish Failed Content and Metadata k8s go_
