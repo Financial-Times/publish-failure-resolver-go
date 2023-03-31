@@ -15,7 +15,7 @@ jobs:
           command: docker build --tag coco/publish-failure-resolver-go:latest .
       - run:
           name: Login in Dockerhub
-          command: echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_LOGIN" --password-stdin
+          command: echo "$DOCKER_ACCESS_TOKEN" | docker login -u "$DOCKER_USER" --password-stdin
       - deploy:
           name: Push Docker image
           command: docker push coco/publish-failure-resolver-go:latest
@@ -32,6 +32,7 @@ workflows:
           filters:
             branches:
               only: "master"
+          context: cm-team-dockerhub
 
   snyk-scanning:
     jobs:
