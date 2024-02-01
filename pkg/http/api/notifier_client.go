@@ -27,14 +27,12 @@ type NotifierClient interface {
 type HTTPNotifier struct {
 	httpClient          *http.Client
 	notifierAddressBase string
-	authHeader          string
 }
 
-func NewHTTPNotifier(httpClient *http.Client, notifierAddress, authHeader string) (*HTTPNotifier, error) {
+func NewHTTPNotifier(httpClient *http.Client, notifierAddress string) (*HTTPNotifier, error) {
 	return &HTTPNotifier{
 		httpClient:          httpClient,
 		notifierAddressBase: notifierAddress,
-		authHeader:          authHeader,
 	}, nil
 }
 
@@ -48,7 +46,7 @@ func (c *HTTPNotifier) Notify(nMsg *NativeMSG, notifierApp, uuid, tid string) er
 		return fmt.Errorf("couldn't create request to notify for uuid=%v %v", uuid, err)
 	}
 	req.Header.Add(transactionidutils.TransactionIDHeader, tid)
-	req.Header.Add("Authorization", c.authHeader)
+
 	req.Header.Add(contentTypeHeader, nMsg.ContentType)
 	req.Header.Add(xOriginSystemIDHeader, nMsg.OriginSystemID)
 	req.Header.Add(schemaVersionHeader, nMsg.SchemaVersion)

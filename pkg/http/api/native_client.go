@@ -26,14 +26,12 @@ type NativeStoreClientInterface interface {
 type NativeStoreClient struct {
 	httpClient    *http.Client
 	nativeAddress string
-	authHeader    string
 }
 
-func NewNativeStoreClient(httpClient *http.Client, nativeAddress, authHeader string) *NativeStoreClient {
+func NewNativeStoreClient(httpClient *http.Client, nativeAddress string) *NativeStoreClient {
 	return &NativeStoreClient{
 		httpClient:    httpClient,
 		nativeAddress: nativeAddress,
-		authHeader:    authHeader,
 	}
 }
 
@@ -47,7 +45,6 @@ func (c *NativeStoreClient) GetNative(collection, uuid, tid string) (nMsg *Nativ
 		return nil, false, fmt.Errorf("couldn't create request to fetch native content uuid=%v %v", uuid, err)
 	}
 	req.Header.Add(transactionidutils.TransactionIDHeader, tid)
-	req.Header.Add("Authorization", c.authHeader)
 	req.Header.Set("Connection", "close")
 	resp, err := c.httpClient.Do(req)
 	if err != nil {

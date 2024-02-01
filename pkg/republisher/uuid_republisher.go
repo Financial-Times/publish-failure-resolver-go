@@ -2,8 +2,6 @@ package republisher
 
 import (
 	"fmt"
-
-	transactionidutils "github.com/Financial-Times/transactionid-utils-go"
 )
 
 type UUIDRepublisher interface {
@@ -28,7 +26,7 @@ func (r *NotifyingUUIDRepublisher) Republish(uuid, tidPrefix string, republishSc
 	isFoundInPriorityCollection := false
 
 	republishFrom := func(collection CollectionMetadata) []*OKMsg {
-		tid := tidPrefix + transactionidutils.NewTransactionID()
+		tid := tidPrefix + "_carousel_0123456789_gentx"
 		msg, isFound, err := r.ucRepublisher.RepublishUUIDFromCollection(uuid, tid, collection)
 		if err != nil {
 			errs = append(errs, fmt.Errorf("error publishing %v", err))

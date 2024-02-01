@@ -2,7 +2,6 @@ package main
 
 import (
 	"bufio"
-	"encoding/base64"
 	"fmt"
 	"os"
 	"regexp"
@@ -20,39 +19,29 @@ import (
 func main() {
 	app := cli.App("publish-failure-resolver-go", "Republish, reimport or move content in UPP.")
 
-	sourceEnvHost := app.String(cli.StringOpt{
-		Name:  "sourceEnvHost",
-		Value: "",
-		Desc:  "Source environment's full hostname (e.g. upp-k8s-publishing-test-eu.ft.com or pub-xp-up.ft.com)",
+	nativerwAddr := app.String(cli.StringOpt{
+		Name:  "nativerwAddr",
+		Value: "http://nativerw:8080",
+		Desc:  "nativerw's address",
 	})
-	targetEnvHost := app.String(cli.StringOpt{
-		Name:  "targetEnvHost",
-		Value: "",
-		Desc:  "Target environment's full hostname (e.g. upp-k8s-delivery-test-eu.ft.com or xp-up.ft.com)",
+	cmsNotifierAddr := app.String(cli.StringOpt{
+		Name:  "cmsNotifierAddr",
+		Value: "http://cms-notifier:8080",
+		Desc:  "cms notifier's address",
 	})
-	uuidList := app.String(cli.StringOpt{
-		Name:  "uuidList",
-		Value: "",
-		Desc:  "Uuid list that you want to republish.",
+	uuidsFile := app.String(cli.StringOpt{
+		Name:  "uuidsFile",
+		Value: "../../uuids.txt",
+		Desc:  "File with a list of uuids that you want to republish.",
 	})
 	transactionIDPrefix := app.String(cli.StringOpt{
 		Name:  "transactionIdPrefix",
 		Value: "",
 		Desc:  "Transaction ID prefix",
 	})
-	sourceAuth := app.String(cli.StringOpt{
-		Name:  "sourceAuth",
-		Value: "",
-		Desc:  "Source env credentials in format username:password (e.g. ops-01-01-2077:ABCDabcd)",
-	})
-	targetAuth := app.String(cli.StringOpt{
-		Name:  "targetAuth",
-		Value: "",
-		Desc:  "Target env credentials in format username:password (e.g. ops-01-01-2077:ABCDabcd)",
-	})
 	republishScope := app.String(cli.StringOpt{
 		Name:  "republishScope",
-		Value: "both",
+		Value: "content",
 		Desc:  "Republish scope (content, metadata, both)",
 	})
 	rateLimitMs := app.Int(cli.IntOpt{
@@ -67,7 +56,7 @@ func main() {
 	})
 	denylistPath := app.String(cli.StringOpt{
 		Name:  "denylist",
-		Value: "/denylist.txt",
+		Value: "../../denylist.txt",
 		Desc:  "Path to UUID collection which are denied from updating.",
 	})
 
@@ -77,8 +66,6 @@ func main() {
 	app.Action = func() {
 		start := time.Now()
 
-		log.Infof("sourceEnvHost=%v", *sourceEnvHost)
-		log.Infof("targetEnvHost=%v", *targetEnvHost)
 		log.Infof("transactionIdPrefix=%v", *transactionIDPrefix)
 		log.Infof("republishScope=%v", *republishScope)
 		log.Infof("rateLimitMs=%v", *rateLimitMs)
@@ -86,8 +73,8 @@ func main() {
 		log.Infof("denylistPath=%v", *denylistPath)
 
 		httpClient := http.NewHTTPClient()
-		nativeStoreClient := api.NewNativeStoreClient(httpClient, "https://"+*sourceEnvHost+"/__nativerw/", "Basic "+base64.StdEncoding.EncodeToString([]byte(*sourceAuth)))
-		notifierClient, err := api.NewHTTPNotifier(httpClient, "https://"+*targetEnvHost+"/__", "Basic "+base64.StdEncoding.EncodeToString([]byte(*targetAuth)))
+		nativeStoreClient := api.NewNativeStoreClient(httpClient, "https://"+*nativerwAddr)
+		notifierClient, err := api.NewHTTPNotifier(httpClient, "https://"+*cmsNotifierAddr+"/notify")
 		rateLimit := time.Duration(*rateLimitMs) * time.Millisecond
 		uuidCollectionRepublisher := republisher.NewNotifyingUCRepublisher(notifierClient, nativeStoreClient, rateLimit)
 		uuidRepublisher := republisher.NewNotifyingUUIDRepublisher(uuidCollectionRepublisher, republisher.DefaultCollections)
@@ -102,9 +89,12 @@ func main() {
 			log.Fatalf("Couldn't create notifier client. %v", err)
 		}
 
-		uuids := regSplit(*uuidList)
+		uuids, err := readUUIDfile(*uuidsFile)
+		if err != nil {
+			log.Fatalf("Couldn't read UUIDs. %v", err)
+		}
 
-		denylistedUUIDs, err := readDenylistedUUIDs(*denylistPath)
+		denylistedUUIDs, err := readUUIDfile(*denylistPath)
 		if err != nil {
 			log.Fatalf("Couldn't read deny-listed UUIDs. %v", err)
 		}
@@ -128,7 +118,7 @@ func main() {
 }
 
 // Returns a list of all deny-listed from republishing UUIDs.
-func readDenylistedUUIDs(denylistPath string) ([]string, error) {
+func readUUIDfile(denylistPath string) ([]string, error) {
 	file, err := os.Open(denylistPath)
 	if err != nil {
 		return nil, fmt.Errorf("opening file: %w", err)
@@ -180,3 +170,28 @@ func regSplit(text string) []string {
 	result[len(indexes)] = text[laststart:]
 	return result
 }
+
+//func readLines(filename string) ([]string, error) {
+//	var lines string
+//	file, err := os.ReadFile(filename)
+//	if err != nil {
+//		return lines, err
+//	}
+//	buf := bytes.NewBuffer(file)
+//	for {
+//		line, err := buf.ReadString('\n')
+//		if len(line) == 0 {
+//			if err != nil {
+//				if err == io.EOF {
+//					break
+//				}
+//				return lines, err
+//			}
+//		}
+//		lines = append(lines, line)
+//		if err != nil && err != io.EOF {
+//			return lines, err
+//		}
+//	}
+//	return lines, nil
+//}

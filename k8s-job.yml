@@ -1,0 +1,18 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: republisher-job
+spec:
+  template:
+    spec:
+      containers:
+        - name: publish-failure-resolver-go
+          image: coco/publish-failure-resolver-go:v1.13.0
+          command: ["/publish-failure-resolver-go"]
+          env:
+            - name: "uuidsFile"
+              value: "./finaluuids.txt"
+            - name: "denylist"
+              value: "./denylist.txt"
+      restartPolicy: Never
+  backoffLimit: 4
