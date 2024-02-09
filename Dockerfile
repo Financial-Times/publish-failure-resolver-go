@@ -14,6 +14,7 @@ RUN VERSION="version=$(git describe --tag --always 2> /dev/null)" \
     && LDFLAGS="-s -w -X '"${BUILDINFO_PACKAGE}$VERSION"' -X '"${BUILDINFO_PACKAGE}$DATETIME"' -X '"${BUILDINFO_PACKAGE}$REPOSITORY"' -X '"${BUILDINFO_PACKAGE}$REVISION"' -X '"${BUILDINFO_PACKAGE}$BUILDER"'" \
     && CGO_ENABLED=0 go build -mod=readonly -a -o /artifacts/${PROJECT} -ldflags="${LDFLAGS}" ./cmd/publish-failure-resolver-go \
     && cp ./denylist.txt /artifacts/ \
+    && cp ./uuids.txt /artifacts/ \
     && echo "Build flags: ${LDFLAGS}"
 
 # Multi-stage build - copy only the certs and the binary into the image

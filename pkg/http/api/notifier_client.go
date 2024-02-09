@@ -37,7 +37,7 @@ func NewHTTPNotifier(httpClient *http.Client, notifierAddress string) (*HTTPNoti
 }
 
 func (c *HTTPNotifier) Notify(nMsg *NativeMSG, notifierApp, uuid, tid string) error {
-	notifierURL, err := url.Parse(c.notifierAddressBase + notifierApp + "/notify")
+	notifierURL, err := url.Parse(c.notifierAddressBase)
 	if err != nil {
 		return fmt.Errorf("coulnd't create URL for notifierAddressBase=%v notifierApp=%v", c.notifierAddressBase, notifierApp)
 	}

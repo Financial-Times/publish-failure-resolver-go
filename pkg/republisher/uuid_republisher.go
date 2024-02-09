@@ -5,7 +5,7 @@ import (
 )
 
 type UUIDRepublisher interface {
-	Republish(uuid, tidPrefix string, republishScope string) (msgs []*OKMsg, errs []error)
+	Republish(uuid, republishScope string, tidCount int) (msgs []*OKMsg, errs []error)
 }
 
 type NotifyingUUIDRepublisher struct {
@@ -20,13 +20,13 @@ func NewNotifyingUUIDRepublisher(uuidCollectionRepublisher UUIDCollectionRepubli
 	}
 }
 
-func (r *NotifyingUUIDRepublisher) Republish(uuid, tidPrefix string, republishScope string) (msgs []*OKMsg, errs []error) {
+func (r *NotifyingUUIDRepublisher) Republish(uuid, republishScope string, tidCount int) (msgs []*OKMsg, errs []error) {
 	isFoundInAnyCollection := false
 	priorityCollection := r.collections["universal-content"]
 	isFoundInPriorityCollection := false
 
 	republishFrom := func(collection CollectionMetadata) []*OKMsg {
-		tid := tidPrefix + "_carousel_0123456789_gentx"
+		tid := fmt.Sprintf("tid_search_reingest_carousel_%010d_gentx", tidCount)
 		msg, isFound, err := r.ucRepublisher.RepublishUUIDFromCollection(uuid, tid, collection)
 		if err != nil {
 			errs = append(errs, fmt.Errorf("error publishing %v", err))

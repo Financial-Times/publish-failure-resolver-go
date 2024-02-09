@@ -31,7 +31,7 @@ func main() {
 	})
 	uuidsFile := app.String(cli.StringOpt{
 		Name:  "uuidsFile",
-		Value: "../../uuids.txt",
+		Value: "/uuids.txt",
 		Desc:  "File with a list of uuids that you want to republish.",
 	})
 	transactionIDPrefix := app.String(cli.StringOpt{
@@ -46,7 +46,7 @@ func main() {
 	})
 	rateLimitMs := app.Int(cli.IntOpt{
 		Name:  "rateLimitMs",
-		Value: 1000,
+		Value: 400,
 		Desc:  "Rate limit at which one thread should not republish faster. (e.g. 200ms)",
 	})
 	parallelism := app.Int(cli.IntOpt{
@@ -56,7 +56,7 @@ func main() {
 	})
 	denylistPath := app.String(cli.StringOpt{
 		Name:  "denylist",
-		Value: "../../denylist.txt",
+		Value: "/denylist.txt",
 		Desc:  "Path to UUID collection which are denied from updating.",
 	})
 
@@ -73,8 +73,8 @@ func main() {
 		log.Infof("denylistPath=%v", *denylistPath)
 
 		httpClient := http.NewHTTPClient()
-		nativeStoreClient := api.NewNativeStoreClient(httpClient, "https://"+*nativerwAddr)
-		notifierClient, err := api.NewHTTPNotifier(httpClient, "https://"+*cmsNotifierAddr+"/notify")
+		nativeStoreClient := api.NewNativeStoreClient(httpClient, *nativerwAddr+"/")
+		notifierClient, err := api.NewHTTPNotifier(httpClient, *cmsNotifierAddr+"/notify")
 		rateLimit := time.Duration(*rateLimitMs) * time.Millisecond
 		uuidCollectionRepublisher := republisher.NewNotifyingUCRepublisher(notifierClient, nativeStoreClient, rateLimit)
 		uuidRepublisher := republisher.NewNotifyingUUIDRepublisher(uuidCollectionRepublisher, republisher.DefaultCollections)

@@ -18,8 +18,9 @@ func (r *notifyingSequentialRepublisher) Republish(uuids []string, publishScope 
 	var msgs []*OKMsg
 	var errs []error
 
+	tidCount := 0
 	for _, uuid := range uuids {
-		tmsgs, terrs := r.uuidRepublisher.Republish(uuid, tidPrefix, publishScope)
+		tmsgs, terrs := r.uuidRepublisher.Republish(uuid, publishScope, tidCount)
 
 		for _, msg := range tmsgs {
 			log.Info(msg)
@@ -29,6 +30,7 @@ func (r *notifyingSequentialRepublisher) Republish(uuids []string, publishScope 
 			log.Error(err)
 			errs = append(errs, err)
 		}
+		tidCount++
 	}
 
 	return msgs, errs
