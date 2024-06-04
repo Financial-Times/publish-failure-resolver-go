@@ -32,7 +32,7 @@ var DefaultCollections = Collections{
 	},
 	"pac-metadata": {
 		name:                  "pac-metadata",
-		defaultOriginSystemID: "http://cmdb.ft.com/systems/pac",
+		defaultOriginSystemID: "http://cmdb.ft.com/systems/ft-pink-annotations",
 		notifierApp:           CmsMetadataNotifier,
 		scope:                 ScopeMetadata,
 	},
