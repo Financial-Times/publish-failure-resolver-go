@@ -24,6 +24,12 @@ var DefaultCollections = Collections{
 		notifierApp:           CmsNotifier,
 		scope:                 ScopeContent,
 	},
+	"content-relation": {
+		name:                  "content-relation",
+		defaultOriginSystemID: "http://cmdb.ft.com/systems/spark",
+		notifierApp:           CmsNotifier,
+		scope:                 ScopeContent,
+	},
 	"video": {
 		name:                  "video",
 		defaultOriginSystemID: "http://cmdb.ft.com/systems/next-video-editor",
@@ -33,6 +39,12 @@ var DefaultCollections = Collections{
 	"pac-metadata": {
 		name:                  "pac-metadata",
 		defaultOriginSystemID: "http://cmdb.ft.com/systems/pac",
+		notifierApp:           CmsMetadataNotifier,
+		scope:                 ScopeMetadata,
+	},
+	"manual-metadata": {
+		name:                  "manual-metadata",
+		defaultOriginSystemID: "http://cmdb.ft.com/systems/cct",
 		notifierApp:           CmsMetadataNotifier,
 		scope:                 ScopeMetadata,
 	},
