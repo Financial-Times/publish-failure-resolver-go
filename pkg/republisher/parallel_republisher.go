@@ -48,13 +48,16 @@ func (r *notifyingParallelRepublisher) Republish(uuids []string, publishScope st
 	}()
 
 	var workloads []workbalancer.Workload
+	tidCount := 0
 	for _, uuid := range uuids {
 		workloads = append(workloads, &publishWork{
 			uuid:            uuid,
 			uuidRepublisher: r.uuidRepublisher,
 			publishScope:    publishScope,
-			tidPrefix:       tidPrefix,
+			tidCount:        tidCount,
 		})
+
+		tidCount++
 	}
 	r.balancer.Balance(workloads)
 	allResultsFetched.Wait()
@@ -64,7 +67,7 @@ func (r *notifyingParallelRepublisher) Republish(uuids []string, publishScope st
 type publishWork struct {
 	uuid            string
 	publishScope    string
-	tidPrefix       string
+	tidCount        int
 	uuidRepublisher UUIDRepublisher
 }
 
@@ -74,6 +77,6 @@ type publishResult struct {
 }
 
 func (w *publishWork) Do() workbalancer.Result {
-	msgs, errs := w.uuidRepublisher.Republish(w.uuid, w.tidPrefix, w.publishScope)
+	msgs, errs := w.uuidRepublisher.Republish(w.uuid, w.publishScope, w.tidCount)
 	return publishResult{msgs, errs}
 }
