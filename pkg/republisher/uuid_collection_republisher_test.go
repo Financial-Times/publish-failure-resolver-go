@@ -50,7 +50,7 @@ func TestRepublishOk_Ok(t *testing.T) {
 	assert.NoError(t, err)
 	assert.True(t, wasFound)
 	assert.Equal(t, expectedMsg, *msg)
-	assert.True(t, time.Now().UnixNano()-start.UnixNano() > 450000, "The time limter should restrain the call to last at least 500 milliseconds")
+	assert.True(t, time.Now().UnixNano()-start.UnixNano() > 450000, "The time limiter should restrain the call to last at least 500 milliseconds")
 }
 
 func TestRepublishNotFound_NotFound(t *testing.T) {
@@ -113,7 +113,7 @@ func TestRepublishErrNotifier_Err(t *testing.T) {
 	assert.Error(t, fmt.Errorf("error on notifier maybe 404"), err)
 	assert.True(t, wasFound)
 	assert.Nil(t, msg)
-	assert.True(t, time.Now().UnixNano()-start.UnixNano() > 450000, "The time limter should restrain the call to last at least 500 milliseconds")
+	assert.True(t, time.Now().UnixNano()-start.UnixNano() > 450000, "The time limiter should restrain the call to last at least 500 milliseconds")
 }
 
 type mockNativeStoreClient struct {

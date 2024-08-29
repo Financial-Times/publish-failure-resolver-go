@@ -1,6 +1,6 @@
 module github.com/Financial-Times/publish-failure-resolver-go
 
-go 1.22
+go 1.23
 
 require (
 	github.com/Financial-Times/transactionid-utils-go v1.1.0
@@ -15,7 +15,7 @@ require (
 	github.com/dchest/uniuri v1.2.0 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/stretchr/objx v0.5.2 // indirect
-	golang.org/x/net v0.25.0 // indirect
-	golang.org/x/sys v0.20.0 // indirect
+	golang.org/x/net v0.28.0 // indirect
+	golang.org/x/sys v0.24.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
