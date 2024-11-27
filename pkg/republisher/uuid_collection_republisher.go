@@ -2,6 +2,7 @@ package republisher
 
 import (
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/Financial-Times/publish-failure-resolver-go/pkg/http/api"
@@ -44,7 +45,7 @@ func (r *NotifyingUCRepublisher) RepublishUUIDFromCollection(uuid, tid string, c
 	if !isFound {
 		return nil, false, nil
 	}
-	if nativeContent.OriginSystemID == "" {
+	if nativeContent.OriginSystemID == "" || isVideoMetadata(nativeContent.OriginSystemID, collection.name) {
 		nativeContent.OriginSystemID = collection.defaultOriginSystemID
 	}
 	err = r.notifierClient.Notify(nativeContent, collection.notifierApp, uuid, tid)
@@ -67,4 +68,8 @@ func (r *NotifyingUCRepublisher) RepublishUUIDFromCollection(uuid, tid string, c
 
 func extendTimeToLength(start time.Time, length time.Duration) {
 	time.Sleep(time.Duration(start.Add(length).UnixNano()-time.Now().UnixNano()) * time.Nanosecond)
+}
+
+func isVideoMetadata(originSystemID string, collectionName string) bool {
+	return strings.Contains(originSystemID, "next-video-editor") && collectionName == "video-metadata"
 }
