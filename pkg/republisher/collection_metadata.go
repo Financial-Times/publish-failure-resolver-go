@@ -50,9 +50,9 @@ var DefaultCollections = Collections{
 	},
 	"next-video-editor": {
 		name:                  "video-metadata",
-		defaultOriginSystemID: "http://cmdb.ft.com/systems/next-video-editor",
-		notifierApp:           CmsMetadataNotifier,
-		scope:                 ScopeMetadata,
+		defaultOriginSystemID: "next-video-editor",
+		notifierApp:           CmsNotifier,
+		scope:                 ScopeContent,
 	},
 	"pages": {
 		name:                  "pages",
