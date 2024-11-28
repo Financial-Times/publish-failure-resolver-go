@@ -71,5 +71,5 @@ func extendTimeToLength(start time.Time, length time.Duration) {
 }
 
 func isVideoMetadata(originSystemID string, collectionName string) bool {
-	return strings.Contains(originSystemID, "next-video-editor") && collectionName == "video-metadata"
+	return collectionName == "video-metadata" && strings.Contains(originSystemID, "next-video-editor")
 }
