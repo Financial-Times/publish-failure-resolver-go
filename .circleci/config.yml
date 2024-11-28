@@ -1,7 +1,7 @@
 version: 2.1
 
 orbs:
-  ft-golang-ci: financial-times/golang-ci@1
+  ft-golang-ci: financial-times/golang-ci@2
 
 jobs:
   build-and-publish-docker-image:
@@ -45,12 +45,4 @@ workflows:
               only: "master"
           context:
             - cm-team-dockerhub
-            - cm-team-github
-
-  snyk-scanning:
-    jobs:
-      - ft-golang-ci/scan:
-          name: scan-dependencies
-          context:
-            - cm-team-snyk
             - cm-team-github
