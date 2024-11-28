@@ -1,6 +1,6 @@
 # publish-failure-resolver-go
 
-[![CircleCI](https://dl.circleci.com/status-badge/img/gh/Financial-Times/publish-failure-resolver-go/tree/master.svg?style=svg&circle-token=CCIPRJ_AafnQ3k8Cj7ofMuCTuWtZa_ddab9cb4d80553371a0fa13d17c02811554d349e)](https://dl.circleci.com/status-badge/redirect/gh/Financial-Times/publish-failure-resolver-go/tree/master)[![Go Report Card](https://goreportcard.com/badge/github.com/Financial-Times/publish-failure-resolver-go)](https://goreportcard.com/report/github.com/Financial-Times/publish-failure-resolver-go) [![Coverage Status](https://coveralls.io/repos/github/Financial-Times/publish-failure-resolver-go/badge.svg?branch=feature/UPPSF-1102-duplicate-uuids)](https://coveralls.io/github/Financial-Times/publish-failure-resolver-go?branch=master)
+[![CircleCI](https://dl.circleci.com/status-badge/img/gh/Financial-Times/publish-failure-resolver-go/tree/master.svg?style=svg&circle-token=CCIPRJ_AafnQ3k8Cj7ofMuCTuWtZa_ddab9cb4d80553371a0fa13d17c02811554d349e)] (https://dl.circleci.com/status-badge/redirect/gh/Financial-Times/publish-failure-resolver-go/tree/master) [![Go Report Card](https://goreportcard.com/badge/github.com/Financial-Times/publish-failure-resolver-go)](https://goreportcard.com/report/github.com/Financial-Times/publish-failure-resolver-go) [![Coverage Status](https://coveralls.io/repos/github/Financial-Times/publish-failure-resolver-go/badge.svg?branch=feature/UPPSF-1102-duplicate-uuids)](https://coveralls.io/github/Financial-Times/publish-failure-resolver-go?branch=master)
 
 ## Introduction
 
