@@ -19,6 +19,16 @@ jobs:
       - deploy:
           name: Push Docker image
           command: docker push coco/publish-failure-resolver-go:latest
+    parameters:
+      github-username:
+        description: username of user with access to private github repositories
+        type: env_var_name
+        default: GITHUB_USERNAME
+      github-token:
+        description: >
+          token to for the user with access to private github repositories
+        type: env_var_name
+        default: GITHUB_TOKEN
 
 workflows:
   tests_and_docker:
