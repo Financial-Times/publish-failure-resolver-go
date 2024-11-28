@@ -12,23 +12,13 @@ jobs:
       - setup_remote_docker
       - run:
           name: Build Docker image
-          command: docker build --tag coco/publish-failure-resolver-go:latest .
+          command: docker build --build-arg GITHUB_USERNAME=$GITHUB_USERNAME --build-arg GITHUB_TOKEN=$GITHUB_TOKEN --tag coco/publish-failure-resolver-go:latest .
       - run:
           name: Login in Dockerhub
           command: echo "$DOCKER_ACCESS_TOKEN" | docker login -u "$DOCKER_USER" --password-stdin
       - deploy:
           name: Push Docker image
           command: docker push coco/publish-failure-resolver-go:latest
-    parameters:
-      github-username:
-        description: username of user with access to private github repositories
-        type: env_var_name
-        default: GITHUB_USERNAME
-      github-token:
-        description: >
-          token to for the user with access to private github repositories
-        type: env_var_name
-        default: GITHUB_TOKEN
 
 workflows:
   tests_and_docker:
