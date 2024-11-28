@@ -45,7 +45,7 @@ func (r *NotifyingUCRepublisher) RepublishUUIDFromCollection(uuid, tid string, c
 	if !isFound {
 		return nil, false, nil
 	}
-	if nativeContent.OriginSystemID == "" || isVideoMetadata(nativeContent.OriginSystemID, collection.name) {
+	if nativeContent.OriginSystemID == "" || isVideoMetadata(collection.name, nativeContent.OriginSystemID) {
 		nativeContent.OriginSystemID = collection.defaultOriginSystemID
 	}
 	err = r.notifierClient.Notify(nativeContent, collection.notifierApp, uuid, tid)
@@ -70,6 +70,6 @@ func extendTimeToLength(start time.Time, length time.Duration) {
 	time.Sleep(time.Duration(start.Add(length).UnixNano()-time.Now().UnixNano()) * time.Nanosecond)
 }
 
-func isVideoMetadata(originSystemID string, collectionName string) bool {
+func isVideoMetadata(collectionName string, originSystemID string) bool {
 	return collectionName == "video-metadata" && strings.Contains(originSystemID, "next-video-editor")
 }
