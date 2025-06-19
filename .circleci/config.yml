@@ -6,7 +6,7 @@ orbs:
 jobs:
   build-and-publish-docker-image:
     docker:
-      - image: docker:stable-git
+      - image: docker:25.0-git
     steps:
       - checkout
       - setup_remote_docker
