@@ -1,6 +1,6 @@
 module github.com/Financial-Times/publish-failure-resolver-go
 
-go 1.23
+go 1.25
 
 require (
 	github.com/Financial-Times/transactionid-utils-go v1.1.0
