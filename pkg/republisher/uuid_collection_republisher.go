@@ -2,7 +2,6 @@ package republisher
 
 import (
 	"fmt"
-	"strings"
 	"time"
 
 	"github.com/Financial-Times/publish-failure-resolver-go/pkg/http/api"
@@ -40,18 +39,18 @@ func (r *NotifyingUCRepublisher) RepublishUUIDFromCollection(uuid, tid string, c
 	start := time.Now()
 	nativeContent, isFound, err := r.nativeStoreClient.GetNative(collection.name, uuid, tid)
 	if err != nil {
-		return nil, false, fmt.Errorf("error while fetching native content: %v", err)
+		return nil, false, fmt.Errorf("error while fetching native content: %w", err)
 	}
 	if !isFound {
 		return nil, false, nil
 	}
-	if nativeContent.OriginSystemID == "" || isVideoMetadata(collection.name, nativeContent.OriginSystemID) {
+	if nativeContent.OriginSystemID == "" {
 		nativeContent.OriginSystemID = collection.defaultOriginSystemID
 	}
 	err = r.notifierClient.Notify(nativeContent, collection.notifierApp, uuid, tid)
 	if err != nil {
 		extendTimeToLength(start, r.rateLimit)
-		return nil, true, fmt.Errorf("couldn't send to notifier uuid=%v tid=%v collection=%v originSystemId=%v size=%vB notifierApp=%v %v", uuid, tid, collection.name, collection.defaultOriginSystemID, len(nativeContent.Body), collection.notifierApp, err)
+		return nil, true, fmt.Errorf("couldn't send to notifier uuid=%v tid=%v collection=%v originSystemId=%v size=%vB notifierApp=%v %w", uuid, tid, collection.name, collection.defaultOriginSystemID, len(nativeContent.Body), collection.notifierApp, err)
 	}
 
 	extendTimeToLength(start, r.rateLimit)
@@ -68,8 +67,4 @@ func (r *NotifyingUCRepublisher) RepublishUUIDFromCollection(uuid, tid string, c
 
 func extendTimeToLength(start time.Time, length time.Duration) {
 	time.Sleep(time.Duration(start.Add(length).UnixNano()-time.Now().UnixNano()) * time.Nanosecond)
-}
-
-func isVideoMetadata(collectionName string, originSystemID string) bool {
-	return collectionName == "video-metadata" && strings.Contains(originSystemID, "next-video-editor")
 }
