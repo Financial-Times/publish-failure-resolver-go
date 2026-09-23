@@ -48,12 +48,6 @@ var DefaultCollections = Collections{
 		notifierApp:           CmsMetadataNotifier,
 		scope:                 ScopeMetadata,
 	},
-	"next-video-editor": {
-		name:                  "video-metadata",
-		defaultOriginSystemID: "next-video-editor",
-		notifierApp:           CmsNotifier,
-		scope:                 ScopeContent,
-	},
 	"pages": {
 		name:                  "pages",
 		defaultOriginSystemID: "http://cmdb.ft.com/systems/spark-lists",
